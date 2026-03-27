@@ -17,7 +17,7 @@ Install the following before attempting to run the code:
 
 1. **Clone the Repository:**
    ```bash
-   git clone <YOUR_GITHUB_REPO_URL_HERE>
+   git clone https://github.com/oneangelbdc/BootUp
    cd BootUp
    ```
 
