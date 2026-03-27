@@ -1,50 +1,81 @@
-# Welcome to your Expo app 👋
+# 💻 Boot Up! - Project Setup & Collaboration Guide
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This guide ensures the team is synchronized and the development environment is consistent across all machines.
 
-## Get started
+---
 
-1. Install dependencies
+## 🛠️ 1. Prerequisites
+Install the following before attempting to run the code:
+* **Node.js (LTS Version):** [Download here](https://nodejs.org/)
+* **VS Code:** Primary code editor.
+* **Git:** For version control.
+* **Expo Go App:** Download from Google Play (Android) or App Store (iOS).
 
+---
+
+## 📥 2. Local Machine Setup
+
+1. **Clone the Repository:**
+   ```bash
+   git clone <YOUR_GITHUB_REPO_URL_HERE>
+   cd BootUp
+   ```
+
+2. **Install Dependencies:**
+   Run this to download the necessary libraries (not included in GitHub):
    ```bash
    npm install
    ```
 
-2. Start the app
+3. **Install Required Expo Modules:**
+   ```bash
+   npx expo install react-native-screens react-native-safe-area-context react-native-gesture-handler expo-av
+   ```
 
+---
+
+## 📱 3. Running & Testing
+
+1. **Start the Development Server:**
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+2. **Connect Device:**
+   * Ensure phone and laptop are on the **same Wi-Fi network**.
+   * Open **Expo Go** and scan the QR code displayed in the terminal.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+3. **Hot Reloading:**
+   Saving changes in VS Code updates the app on your phone instantly. Press **`r`** in the terminal if it needs a manual refresh.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 📂 4. Project Architecture
+* `app/index.tsx`: Main entry and Navigation Stack logic.
+* `src/screens/`: Individual level files (Start, Menu, BuildThePC, etc.).
+* `src/styles/theme.js`: Centralized colors and UI styling. **Do not hardcode colors; use the theme.**
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
+## 🤝 5. Collaboration Rules (Git)
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+* **Sync Before Working:** Always run `git pull origin main` before starting a session to avoid code conflicts.
+* **Submitting Changes:**
+  ```bash
+  git add .
+  git commit -m "Describe what you fixed or added"
+  git push origin main
+  ```
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## 📦 6. Building the APK (Submission)
+To generate an installable file for final testing:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+1. **Login:** `eas login`
+2. **Execute Build:** `eas build -p android --profile preview`
+3. **Download:** Follow the link provided in the terminal after 15-20 minutes to get the `.apk` file.
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+**Visual Graphics Design - Group 4**
+*Pamantasan ng Lungsod ng Maynila*
