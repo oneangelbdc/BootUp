@@ -1,7 +1,9 @@
+MenuScreen.js
+
 import React from 'react';
 import {
   View, Text, TouchableOpacity,
-  StyleSheet, ScrollView, Dimensions
+  StyleSheet, ScrollView, Dimensions, Alert
 } from 'react-native';
 import { theme } from '../styles/theme';
 
@@ -43,7 +45,21 @@ export default function MenuScreen({ navigation }) {
           <TouchableOpacity
             key={game.id}
             style={styles.card}
-            onPress={() => navigation.navigate(game.screen, { gameId: game.id })}
+            onPress={() => {
+              if (game.id === 'BuildThePC') {
+                Alert.alert(
+                  'Select Difficulty',
+                  'Choose how you want to assemble the hardware:',
+                  [
+                    { text: 'Easy (Basic Parts)', onPress: () => navigation.navigate(game.screen, { gameId: game.id, difficulty: 'easy' }) },
+                    { text: 'Normal (In-Depth)', onPress: () => navigation.navigate(game.screen, { gameId: game.id, difficulty: 'normal' }) },
+                    { text: 'Cancel', style: 'cancel' }
+                  ]
+                );
+              } else {
+                navigation.navigate(game.screen, { gameId: game.id });
+              }
+            }}
             activeOpacity={0.85}
           >
             <Text style={styles.cardIcon}>{game.icon}</Text>
@@ -102,3 +118,4 @@ const styles = StyleSheet.create({
     marginTop: 4, letterSpacing: 1,
   },
 });
+
