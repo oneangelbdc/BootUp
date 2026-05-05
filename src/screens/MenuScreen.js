@@ -1,11 +1,10 @@
-MenuScreen.js
-
 import React from 'react';
 import {
   View, Text, TouchableOpacity,
-  StyleSheet, ScrollView, Dimensions, Alert
+  StyleSheet, ScrollView, Dimensions
 } from 'react-native';
 import { theme } from '../styles/theme';
+import AudioManager from '../utils/AudioManager';
 
 const { width } = Dimensions.get('window');
 
@@ -41,24 +40,16 @@ export default function MenuScreen({ navigation }) {
         <Text style={styles.heading}>Choose</Text>
         <Text style={styles.headingAccent}>Mission</Text>
         <Text style={styles.subheading}>3 mini-games to boot the system</Text>
+        
         {games.map((game) => (
           <TouchableOpacity
             key={game.id}
             style={styles.card}
             onPress={() => {
-              if (game.id === 'BuildThePC') {
-                Alert.alert(
-                  'Select Difficulty',
-                  'Choose how you want to assemble the hardware:',
-                  [
-                    { text: 'Easy (Basic Parts)', onPress: () => navigation.navigate(game.screen, { gameId: game.id, difficulty: 'easy' }) },
-                    { text: 'Normal (In-Depth)', onPress: () => navigation.navigate(game.screen, { gameId: game.id, difficulty: 'normal' }) },
-                    { text: 'Cancel', style: 'cancel' }
-                  ]
-                );
-              } else {
-                navigation.navigate(game.screen, { gameId: game.id });
-              }
+              AudioManager.playTap();
+              // Directly navigate to the game screen.
+              // Level selection is handled inside the game screen now.
+              navigation.navigate(game.screen, { gameId: game.id });
             }}
             activeOpacity={0.85}
           >
@@ -118,4 +109,3 @@ const styles = StyleSheet.create({
     marginTop: 4, letterSpacing: 1,
   },
 });
-

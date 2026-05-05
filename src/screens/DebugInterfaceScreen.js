@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import InGameMenu from '../components/InGameMenu';
+import AudioManager from '../utils/AudioManager';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -53,23 +54,21 @@ const LEVELS = [
       { id: 'lock',         src: require('../assets/images/lock_icons_2.png') },
     ],
   },
-{ // LEVEL 3 (SPOT THE DIFFERENCE)
-  name: 'System Error Cleanup',
-  badge: 'LEVEL 3',
-  type: 'spot', 
-  desc: 'Find and fix all 5 bugs in the interface below!',
-  bgImage: require('../assets/images/Intface-3bg.png'), 
-  aspectRatio: 1.15,
-  
-  // More precise bug coordinates and sizes
-  bugs: [
-    { id: 1, leftPct: 0.30, topPct: 0.77, phWidth: 100, phHeight: 21, hint: 'Check the left phone button!' },// get started button on left phone is wrong
-    { id: 2, leftPct: 0.37, topPct: 0.94, phWidth: 30, phHeight: 19, hint: 'New users should Sign Up, not Log In!' },// log in button at bottom is wrong
-    { id: 3, leftPct: 0.58, topPct: 0.04, phWidth: 31, phHeight: 15, hint: 'The time on the right phone is corrupted!' },// time display on right phone is wrong
-    { id: 4, leftPct: 0.70, topPct: 0.66, phWidth: 103, phHeight: 23, hint: 'Why is there a Log Out button on a Sign Up page?' },// log out button on right phone is wrong
-    { id: 5, leftPct: 0.64, topPct: 0.75, phWidth: 25, phHeight: 25, hint: 'Check the link at the bottom right!' },
-  ]
-},
+  { // LEVEL 3 (SPOT THE DIFFERENCE)
+    name: 'System Error Cleanup',
+    badge: 'LEVEL 3',
+    type: 'spot', 
+    desc: 'Find and fix all 5 bugs in the interface below!',
+    bgImage: require('../assets/images/Intface-3bg.png'), 
+    aspectRatio: 1.15,
+    bugs: [
+      { id: 1, leftPct: 0.30, topPct: 0.77, phWidth: 100, phHeight: 21, hint: 'Check the left phone button!' },
+      { id: 2, leftPct: 0.37, topPct: 0.94, phWidth: 30, phHeight: 19, hint: 'New users should Sign Up, not Log In!' },
+      { id: 3, leftPct: 0.58, topPct: 0.04, phWidth: 31, phHeight: 15, hint: 'The time on the right phone is corrupted!' },
+      { id: 4, leftPct: 0.70, topPct: 0.66, phWidth: 103, phHeight: 23, hint: 'Why is there a Log Out button on a Sign Up page?' },
+      { id: 5, leftPct: 0.64, topPct: 0.75, phWidth: 25, phHeight: 25, hint: 'Check the link at the bottom right!' },
+    ]
+  },
 ];
 
 const HIT_PCT = 0.12;
@@ -191,6 +190,13 @@ function DebugGameScreen({ navigation, route }) {
     }
   }, [levelIndex, current]);
 
+  // ✅ RESET LISTENER: Clears board when "Play Again" is clicked
+  useEffect(() => {
+    if (route.params?.reset) {
+      handleRestart();
+    }
+  }, [route.params?.reset]);
+
   const onContainerLayout = useCallback(() => {
     if (containerViewRef.current) {
       containerViewRef.current.measure((x, y, w, h, px, py) => {
@@ -211,6 +217,7 @@ function DebugGameScreen({ navigation, route }) {
     const updated = bugStates.map(bug => bug.id === id ? { ...bug, isFixed: true } : bug);
     setBugStates(updated);
     triggerFeedback('correct');
+    AudioManager.playCorrect(); // 🔊 Added SFX
     if (updated.every(b => b.isFixed)) {
       setTimeout(() => setShowComplete(true), 600);
     }
@@ -220,6 +227,7 @@ function DebugGameScreen({ navigation, route }) {
   const handleDrop = useCallback((itemId, zoneId, correct) => {
     if (correct) {
       triggerFeedback('correct');
+      AudioManager.playCorrect(); // 🔊 Added SFX
       setPlacedMap(prev => {
         const next = { ...prev, [zoneId]: current.inventory.find(i => i.id === itemId) };
         if (Object.keys(next).length === current.placeholders.length) {
@@ -229,6 +237,7 @@ function DebugGameScreen({ navigation, route }) {
       });
     } else {
       triggerFeedback('wrong');
+      AudioManager.playWrong(); // 🔊 Added SFX
     }
   }, [current]);
 
@@ -243,7 +252,7 @@ function DebugGameScreen({ navigation, route }) {
     setTimeout(() => setHint(''), 3500);
   };
 
-  const redo = () => {
+  const handleRestart = () => {
     setPlacedMap({});
     if (current.type === 'spot') {
       setBugStates(current.bugs.map(b => ({ ...b, isFixed: false })));
@@ -356,10 +365,10 @@ function DebugGameScreen({ navigation, route }) {
       styles.imageContainer,
       {
         aspectRatio: current.aspectRatio || 1.15,
-        width: '95%', // INCREASED: from 100% to 95% but with larger maxHeight
-        maxHeight: SCREEN_WIDTH * 1.25 * 0.9, // INCREASED: from 1.15*0.85 to 1.25*0.9 for bigger display
+        width: '95%',
+        maxHeight: SCREEN_WIDTH * 1.25 * 0.9,
         alignSelf: 'center',
-        minHeight: 350 // ADDED: Minimum height to ensure it's always prominent
+        minHeight: 350
       }
     ]}
   >
@@ -368,7 +377,7 @@ function DebugGameScreen({ navigation, route }) {
       style={StyleSheet.absoluteFill} 
       resizeMode="contain"
       imageStyle={{ 
-        borderRadius: 16, // Slightly larger radius
+        borderRadius: 16,
         width: '100%', 
         height: '100%' 
       }}
@@ -441,13 +450,18 @@ function DebugGameScreen({ navigation, route }) {
             <TouchableOpacity style={styles.actionIconCenter} onPress={showHint}>
               <Text style={styles.actionEmoji}>💡</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionIcon} onPress={redo}>
+            <TouchableOpacity style={styles.actionIcon} onPress={handleRestart}>
               <Text style={styles.actionEmoji}>🔄</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        <InGameMenu visible={menuVisible} onClose={() => setMenuVisible(false)} onRestart={redo} onHome={() => navigation.navigate('Menu')} />
+        <InGameMenu
+          visible={menuVisible}
+          onClose={() => setMenuVisible(false)}
+          onRestart={handleRestart}
+          onSwitchLevel={() => navigation.goBack()}
+        />
 
         {/* COMPLETION POPUP */}
         {showComplete && (
@@ -462,7 +476,7 @@ function DebugGameScreen({ navigation, route }) {
                 ))}
               </View>
               <View style={styles.popupBtnRow}>
-                <TouchableOpacity style={styles.popupBtnOutline} onPress={redo}>
+                <TouchableOpacity style={styles.popupBtnOutline} onPress={handleRestart}>
                   <Text style={styles.popupBtnOutlineTxt}>Redo</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.popupBtnFill} onPress={nextLevel}>

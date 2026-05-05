@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
 import { theme } from '../styles/theme';
 import PowerUpToolbar from '../components/PowerUpToolbar';
 import InGameMenu from '../components/InGameMenu';
+import AudioManager from '../utils/AudioManager';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
@@ -495,6 +496,7 @@ function GameScreen({ navigation, route }) {
     setSelected(null);
 
     if (isPairCorrect(a, b)) {
+      AudioManager.playCorrect();
       // ── Correct connection ──
       const da = level.devices.find((d) => d.id === a);
       const db = level.devices.find((d) => d.id === b);
@@ -516,6 +518,7 @@ function GameScreen({ navigation, route }) {
           }), 800);
       }
     } else {
+      AudioManager.playWrong();
       // ── Wrong connection — shake + flash + inline error ──
       const newMistakes = mistakes + 1;
       setMistakes(newMistakes);
@@ -553,8 +556,8 @@ function GameScreen({ navigation, route }) {
 
       {/* ── Header ── */}
       <View style={g.header}>
-        <TouchableOpacity style={g.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={g.backText}>←  Circuit Connect</Text>
+        <TouchableOpacity style={g.backBtn} onPress={() => navigation.navigate('Menu')}>
+          <Text style={g.backText}>← Choose Mission</Text>
         </TouchableOpacity>
         <TouchableOpacity style={g.menuBtn} onPress={() => setMenuVisible(true)}>
           <Text style={g.menuText}>Menu</Text>
@@ -665,11 +668,11 @@ function GameScreen({ navigation, route }) {
 
       {/* ── In-game menu ── */}
       <InGameMenu
-        visible={menuVisible}
-        onClose={() => setMenuVisible(false)}
-        onRestart={handleRestart}
-        onHome={() => navigation.navigate('Menu')}
-      />
+  visible={menuVisible}
+  onClose={() => setMenuVisible(false)}
+  onRestart={handleRestart}
+  onSwitchLevel={() => navigation.goBack()} // ✅ Goes back to CircuitLevels
+/>
     </View>
   );
 }
