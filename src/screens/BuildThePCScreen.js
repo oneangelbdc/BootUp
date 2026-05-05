@@ -13,7 +13,7 @@ const BOARD_H = BOARD_W / 0.65;
 const IO_W = BOARD_W * 0.17;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ORIGINAL CONSTANTS (Unchanged)
+// ORIGINAL CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 const PART_IMAGES = {
   ioSlot: require('../assets/images/io_interface.png'),
@@ -70,7 +70,7 @@ const SLOT_REQUIREMENTS = {
 };
 
 // ────────────────────────────────────────────────────────────────────────────
-// LEVEL CONFIGURATION (Matches your original Easy & Normal modes)
+// LEVEL CONFIGURATION
 // ─────────────────────────────────────────────────────────────────────────────
 const LEVELS = {
   easy: {
@@ -100,7 +100,7 @@ const LEVELS = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// LEVEL SELECT SCREEN (Matches CircuitConnectScreen pattern)
+// LEVEL SELECT SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
 function LevelSelectScreen({ navigation }) {
   return (
@@ -165,7 +165,7 @@ function LevelCard({ level, onPress }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GAME SCREEN (Your original gameplay logic, adapted for levelKey)
+// GAME SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
 function GameScreen({ navigation, route }) {
   const { levelKey } = route.params;
@@ -360,7 +360,7 @@ function GameScreen({ navigation, route }) {
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
         onRestart={handleReset}
-        onSwitchLevel={() => navigation.goBack()} // ✅ Goes back to PCLevels (difficulty selector)
+        onSwitchLevel={() => navigation.goBack()} //
       />
 
       <Modal visible={showSpecs} transparent animationType="fade">
@@ -386,7 +386,7 @@ function GameScreen({ navigation, route }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// STYLES (Exact copy from your original file)
+// STYLES
 // ────────────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safeContainer: { flex: 1, backgroundColor: '#1A202C' },
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// LEVEL SELECT STYLES (Matches CircuitConnectScreen)
+// LEVEL SELECT STYLES
 // ─────────────────────────────────────────────────────────────────────────────
 const ls = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0F172A' },
@@ -483,7 +483,7 @@ const ls = StyleSheet.create({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ROOT EXPORT — Nested Stack (Matches CircuitConnectScreen pattern)
+// ROOT EXPORT
 // ─────────────────────────────────────────────────────────────────────────────
 const Stack = createNativeStackNavigator();
 
