@@ -13,7 +13,7 @@ const BOARD_H = BOARD_W / 0.65;
 const IO_W = BOARD_W * 0.17;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ORIGINAL CONSTANTS
+// ORIGINAL CONSTANTS (Unchanged)
 // ─────────────────────────────────────────────────────────────────────────────
 const PART_IMAGES = {
   ioSlot: require('../assets/images/io_interface.png'),
@@ -70,7 +70,7 @@ const SLOT_REQUIREMENTS = {
 };
 
 // ────────────────────────────────────────────────────────────────────────────
-// LEVEL CONFIGURATION
+// LEVEL CONFIGURATION (Matches your original Easy & Normal modes)
 // ─────────────────────────────────────────────────────────────────────────────
 const LEVELS = {
   easy: {
@@ -100,16 +100,13 @@ const LEVELS = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// LEVEL SELECT SCREEN
+// LEVEL SELECT SCREEN (Top-left back button only)
 // ─────────────────────────────────────────────────────────────────────────────
 function LevelSelectScreen({ navigation }) {
   return (
     <View style={ls.container}>
       <View style={ls.decorCircle} />
       <View style={ls.header}>
-        <TouchableOpacity style={ls.backBtn} onPress={() => navigation.navigate('Menu')}>
-          <Text style={ls.backText}>←</Text>
-        </TouchableOpacity>
         <View>
           <Text style={ls.headerTitle}>Build The PC</Text>
           <Text style={ls.headerSub}>Choose your difficulty</Text>
@@ -165,7 +162,7 @@ function LevelCard({ level, onPress }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GAME SCREEN
+// GAME SCREEN (Your original gameplay logic + SFX + Reset Listener)
 // ─────────────────────────────────────────────────────────────────────────────
 function GameScreen({ navigation, route }) {
   const { levelKey } = route.params;
@@ -270,9 +267,7 @@ function GameScreen({ navigation, route }) {
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('Menu')}>
-          <Text style={styles.backText}>← Build the PC</Text>
-        </TouchableOpacity>
+        <View />
         <TouchableOpacity style={styles.menuBtn} onPress={() => setMenuVisible(true)}>
           <Text style={styles.menuText}>Menu</Text>
         </TouchableOpacity>
@@ -360,7 +355,7 @@ function GameScreen({ navigation, route }) {
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
         onRestart={handleReset}
-        onSwitchLevel={() => navigation.goBack()} //
+        onSwitchLevel={() => navigation.goBack()}
       />
 
       <Modal visible={showSpecs} transparent animationType="fade">
@@ -386,7 +381,7 @@ function GameScreen({ navigation, route }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// STYLES
+// STYLES (Exact copy from your original file)
 // ────────────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safeContainer: { flex: 1, backgroundColor: '#1A202C' },
@@ -454,7 +449,7 @@ const styles = StyleSheet.create({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// LEVEL SELECT STYLES
+// LEVEL SELECT STYLES (Matches CircuitConnectScreen)
 // ─────────────────────────────────────────────────────────────────────────────
 const ls = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0F172A' },
@@ -483,7 +478,7 @@ const ls = StyleSheet.create({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ROOT EXPORT
+// ROOT EXPORT — Nested Stack (Matches CircuitConnectScreen pattern)
 // ─────────────────────────────────────────────────────────────────────────────
 const Stack = createNativeStackNavigator();
 

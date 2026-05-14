@@ -281,9 +281,7 @@ function DebugGameScreen({ navigation, route }) {
 
         {/* HEADER */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.navigate('Menu')}>
-            <Text style={styles.iconText}>←</Text>
-          </TouchableOpacity>
+          <View style={{ width: 50 }} />
           <Text style={styles.titleText}>{current.name}</Text>
           <TouchableOpacity style={styles.menuBtn} onPress={() => setMenuVisible(true)}>
             <Text style={styles.menuText}>Menu</Text>

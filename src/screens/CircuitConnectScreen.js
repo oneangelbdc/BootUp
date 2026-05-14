@@ -360,9 +360,6 @@ function LevelSelectScreen({ navigation }) {
     <View style={ls.container}>
       <View style={ls.decorCircle} />
       <View style={ls.header}>
-        <TouchableOpacity style={ls.backBtn} onPress={() => navigation.navigate('Menu')}>
-          <Text style={ls.backText}>←</Text>
-        </TouchableOpacity>
         <View>
           <Text style={ls.headerTitle}>Circuit Connect</Text>
           <Text style={ls.headerSub}>Choose your difficulty</Text>
@@ -556,9 +553,7 @@ function GameScreen({ navigation, route }) {
 
       {/* ── Header ── */}
       <View style={g.header}>
-        <TouchableOpacity style={g.backBtn} onPress={() => navigation.navigate('Menu')}>
-          <Text style={g.backText}>← Choose Mission</Text>
-        </TouchableOpacity>
+        <View />
         <TouchableOpacity style={g.menuBtn} onPress={() => setMenuVisible(true)}>
           <Text style={g.menuText}>Menu</Text>
         </TouchableOpacity>
@@ -744,8 +739,8 @@ const ls = StyleSheet.create({
     shadowOpacity: 0.08, shadowRadius: 3,
   },
   backText: { fontSize: 18, color: theme.colors.text },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
-  headerSub: { fontSize: 12, color: theme.colors.textLight, marginTop: 1 },
+  headerTitle: { color: theme.colors.text, fontSize: 24, fontWeight: 'bold' },
+  headerSub: { color: theme.colors.textLight, fontSize: 14, marginTop: 4 },
   list: { paddingHorizontal: 16 },
   card: {
     backgroundColor: theme.colors.white, borderRadius: 16,
