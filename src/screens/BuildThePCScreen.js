@@ -4,6 +4,7 @@ import {
   Alert, ScrollView, Image, Modal, SafeAreaView, Platform, ImageBackground, Animated
 } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { theme } from '../styles/theme';
 import InGameMenu from '../components/InGameMenu';
 import AudioManager from '../utils/AudioManager';
 
@@ -70,7 +71,7 @@ const SLOT_REQUIREMENTS = {
 };
 
 // ────────────────────────────────────────────────────────────────────────────
-// LEVEL CONFIGURATION (Matches your original Easy & Normal modes)
+// LEVEL CONFIGURATION
 // ─────────────────────────────────────────────────────────────────────────────
 const LEVELS = {
   easy: {
@@ -100,13 +101,16 @@ const LEVELS = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// LEVEL SELECT SCREEN (Top-left back button only)
+// LEVEL SELECT SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
 function LevelSelectScreen({ navigation }) {
   return (
     <View style={ls.container}>
       <View style={ls.decorCircle} />
       <View style={ls.header}>
+        <TouchableOpacity style={ls.backBtn} onPress={() => navigation.navigate('Menu')}>
+          <Text style={ls.backText}>←</Text>
+        </TouchableOpacity>
         <View>
           <Text style={ls.headerTitle}>Build The PC</Text>
           <Text style={ls.headerSub}>Choose your difficulty</Text>
@@ -162,7 +166,7 @@ function LevelCard({ level, onPress }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GAME SCREEN (Your original gameplay logic + SFX + Reset Listener)
+// GAME SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
 function GameScreen({ navigation, route }) {
   const { levelKey } = route.params;
@@ -179,7 +183,7 @@ function GameScreen({ navigation, route }) {
   const [showHint, setShowHint] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
 
-  // ✅ RESET LISTENER: Clears board when "Play Again" is clicked
+  // ✅ RESET LISTENER
   useEffect(() => {
     if (route.params?.reset) {
       handleReset();
@@ -212,7 +216,7 @@ function GameScreen({ navigation, route }) {
     }
     if (!selectedPart) return;
     if (selectedPart.type !== SLOT_REQUIREMENTS[slotName]) {
-      AudioManager.playWrong(); // 🔊 Plays sfx_wrong.mp3
+      AudioManager.playWrong();
       Alert.alert('Incompatibility', 'Physical dimensions do not match this slot.');
       return;
     }
@@ -223,7 +227,7 @@ function GameScreen({ navigation, route }) {
     setPlacedPartIds(prev => [...prev, selectedPart.id]);
     setSelectedPart(null);
     setShowHint(false);
-    AudioManager.playCorrect(); // 🔊 Plays sfx_correct.mp3
+    AudioManager.playCorrect();
   };
 
   const renderSlot = (slotName, style, label) => {
@@ -266,8 +270,11 @@ function GameScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.safeContainer}>
+      {/* ✅ UPDATED: Matches CircuitConnectScreen header pattern */}
       <View style={styles.header}>
-        <View />
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <Text style={styles.backText}>← Back to level selection</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.menuBtn} onPress={() => setMenuVisible(true)}>
           <Text style={styles.menuText}>Menu</Text>
         </TouchableOpacity>
@@ -355,7 +362,6 @@ function GameScreen({ navigation, route }) {
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
         onRestart={handleReset}
-        onSwitchLevel={() => navigation.goBack()}
       />
 
       <Modal visible={showSpecs} transparent animationType="fade">
@@ -381,15 +387,16 @@ function GameScreen({ navigation, route }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// STYLES (Exact copy from your original file)
+// STYLES
 // ────────────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safeContainer: { flex: 1, backgroundColor: '#1A202C' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#2D3748' },
-  backBtn: { backgroundColor: '#4A5568', padding: 10, borderRadius: 8 },
-  backText: { fontWeight: '600', color: '#FFFFFF', fontSize: 13 },
-  menuBtn: { backgroundColor: '#4A5568', padding: 10, paddingHorizontal: 20, borderRadius: 8 },
-  menuText: { fontWeight: '600', color: '#FFFFFF', fontSize: 13 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 10 },
+  backBtn: { backgroundColor: theme.colors.white, padding: 10, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 },
+  backText: { fontWeight: '700', color: theme.colors.text, fontSize: 13 },
+  menuBtn: { backgroundColor: theme.colors.white, padding: 10, paddingHorizontal: 20, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 },
+  menuText: { fontWeight: '700', color: theme.colors.text },
+  
   scrollContent: { paddingVertical: 20, alignItems: 'center' },
   boardWrapper: { flexDirection: 'row', alignItems: 'flex-start', width: BOARD_W + IO_W * 0.25 },
   ioSlotOuter: { width: IO_W, height: BOARD_H * 0.45, marginTop: BOARD_H * 0.01, marginRight: -(IO_W * 0.75), zIndex: 10, borderWidth: 1, borderColor: '#4FD1C5', borderStyle: 'dashed', backgroundColor: 'rgba(79, 209, 197, 0.05)', borderRadius: 4, overflow: 'hidden' },
@@ -448,37 +455,36 @@ const styles = StyleSheet.create({
   closeBtn: { backgroundColor: '#E53E3E', padding: 12, borderRadius: 8, alignItems: 'center' },
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// LEVEL SELECT STYLES (Matches CircuitConnectScreen)
-// ─────────────────────────────────────────────────────────────────────────────
 const ls = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F172A' },
-  decorCircle: { position: 'absolute', top: -100, right: -100, width: 300, height: 300, borderRadius: 150, backgroundColor: '#1E293B', opacity: 0.5 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
-  backBtn: { marginRight: 16, padding: 8 },
-  backText: { color: '#94A3B8', fontSize: 24, fontWeight: 'bold' },
-  headerTitle: { color: '#F1F5F9', fontSize: 24, fontWeight: 'bold' },
-  headerSub: { color: '#94A3B8', fontSize: 14, marginTop: 4 },
-  list: { paddingHorizontal: 16, paddingBottom: 20 },
-  card: { backgroundColor: '#1E293B', borderRadius: 16, marginBottom: 16, borderWidth: 2, overflow: 'hidden' },
-  cardBar: { height: 6 },
-  cardBody: { padding: 16 },
-  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  cardTopLeft: { flex: 1 },
-  badge: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginBottom: 8 },
-  badgeText: { fontSize: 12, fontWeight: 'bold', letterSpacing: 1 },
-  cardTitle: { color: '#F1F5F9', fontSize: 18, fontWeight: 'bold' },
-  stars: { color: '#FBBF24', fontSize: 16, marginTop: 4 },
-  arrowWrap: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#334155', alignItems: 'center', justifyContent: 'center' },
-  arrow: { fontSize: 24, fontWeight: 'bold' },
-  cardDesc: { color: '#94A3B8', fontSize: 13, marginTop: 8, lineHeight: 18 },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 12, gap: 8 },
-  chip: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, backgroundColor: '#0F172A' },
-  chipText: { fontSize: 11, fontWeight: '600' },
+  container: { flex: 1, backgroundColor: theme.colors.background, paddingTop: 50 },
+  decorCircle: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: theme.colors.primary, opacity: 0.12 },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 20, gap: 12 },
+  backBtn: { backgroundColor: theme.colors.white, padding: 10, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 },
+  backText: { fontSize: 18, color: theme.colors.text },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
+  headerSub: { fontSize: 12, color: theme.colors.textLight, marginTop: 1 },
+  list: { paddingHorizontal: 16 },
+  card: { backgroundColor: theme.colors.white, borderRadius: 16, borderWidth: 1.5, flexDirection: 'row', overflow: 'hidden', elevation: 3, marginBottom: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6 },
+  cardBar: { width: 5 },
+  cardBody: { flex: 1, padding: 16 },
+  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  cardTopLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  badge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
+  badgeText: { fontSize: 10, fontWeight: '800', letterSpacing: 1 },
+  stars: { fontSize: 14, letterSpacing: 2 },
+  pairsPill: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
+  pairsText: { fontSize: 11, fontWeight: '700' },
+  cardTitle: { fontSize: 16, fontWeight: '700', color: theme.colors.text, marginBottom: 4 },
+  cardDesc: { fontSize: 12, color: theme.colors.textLight, lineHeight: 18, marginBottom: 10 },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  chip: { backgroundColor: theme.colors.background, borderWidth: 1, borderColor: '#E2DFD8', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  chipText: { fontSize: 11, color: theme.colors.textLight },
+  arrowWrap: { justifyContent: 'center', paddingRight: 14 },
+  arrow: { fontSize: 26, fontWeight: '300' },
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ROOT EXPORT — Nested Stack (Matches CircuitConnectScreen pattern)
+// ROOT EXPORT
 // ─────────────────────────────────────────────────────────────────────────────
 const Stack = createNativeStackNavigator();
 
