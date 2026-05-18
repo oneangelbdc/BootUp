@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Dimensions,
-  Alert, ScrollView, Image, Modal, SafeAreaView, Platform, ImageBackground, Animated, BackHandler
+  Alert, ScrollView, Image, Modal, SafeAreaView, Platform, ImageBackground, Animated, BackHandler // ✅ Added BackHandler
 } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { theme } from '../styles/theme';
@@ -14,7 +14,7 @@ const BOARD_H = BOARD_W / 0.65;
 const IO_W = BOARD_W * 0.17;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// IMAGE & DATA CONSTANTS
+// IMAGE CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 const PART_IMAGES = {
   // Hard Level (Motherboard)
@@ -39,13 +39,20 @@ const PART_IMAGES = {
   easyRamPlaced: require('../assets/images/easy_ram_placed.png'),
   easyPciPlaced: require('../assets/images/easy_pci_placed.png'),
   
-  // ✅ NEW: Easy Level (PC Case)
+  // New Easy Level (PC Case)
   pcMbInv: require('../assets/images/pc_mb_inventory.png'),
   pcMbPlaced: require('../assets/images/pc_mb_placed.png'),
   pcPsuInv: require('../assets/images/pc_psu_inventory.png'),
   pcPsuPlaced: require('../assets/images/pc_psu_placed.png'),
   pcDdInv: require('../assets/images/pc_dd_inventory.png'),
   pcDdPlaced: require('../assets/images/pc_dd_placed.png'),
+};
+
+// ✅ NEW: Toolbar Icon Images
+const TOOLBAR_ICONS = {
+  specs: require('../assets/images/icon-clipboard.png'),   // Replace with your actual path
+  hint: require('../assets/images/icon-lightbulb.png'),    // Replace with your actual path
+  inspect: require('../assets/images/icon-magnifying-glass.png') // Replace with your actual path
 };
 
 const HARD_PARTS = [
@@ -75,7 +82,7 @@ const MEDIUM_PARTS = [
 ];
 
 const SLOT_REQUIREMENTS = {
-  // ✅ New Easy
+  // New Easy
   mbSlot: 'MB', psuSlot: 'PSU', ddSlot: 'DD',
   // Medium
   easyCPU: 'CPU', easyRAM: 'RAM', easyPCI: 'PCI',
@@ -264,6 +271,7 @@ function GameScreen({ navigation, route }) {
     AudioManager.playCorrect();
   };
 
+  // ✅ Clean Empty Slots: No text badges, just dashed borders
   const renderSlot = (slotName, style, label) => {
     const imgKey = placedParts[slotName];
     const isPlaced = !!imgKey;
@@ -274,7 +282,6 @@ function GameScreen({ navigation, route }) {
         onPress={() => handleSlotPress(slotName, label)}
         activeOpacity={0.8}
       >
-        {/* ✅ Only renders image when placed. Empty slots show dashed borders. */}
         {isPlaced && (
           <Image source={PART_IMAGES[imgKey]} style={styles.placedImage} resizeMode="stretch" />
         )}
@@ -402,16 +409,27 @@ function GameScreen({ navigation, route }) {
       </ScrollView>
 
       <View style={styles.footerToolbar}>
+        {/* ✅ Specs Icon */}
         <TouchableOpacity onPress={() => setShowSpecs(true)} style={styles.toolBtn}>
-          <Text style={{ fontSize: 24 }}>📋</Text>
+          <Image source={TOOLBAR_ICONS.specs} style={{ width: 24, height: 24}} />
           <Text style={styles.toolBtnLabel}>Specs</Text>
         </TouchableOpacity>
+        
+        {/* ✅ Hint Icon */}
         <TouchableOpacity onPress={() => setShowHint(!showHint)} style={styles.toolBtn}>
-          <Text style={{ fontSize: 24, opacity: showHint ? 1 : 0.5 }}>💡</Text>
+          <Image 
+            source={TOOLBAR_ICONS.hint} 
+            style={{ width: 24, height: 24, opacity: showHint ? 1 : 0.5 }} 
+          />
           <Text style={styles.toolBtnLabel}>Hint</Text>
         </TouchableOpacity>
+        
+        {/* ✅ Inspect Icon */}
         <TouchableOpacity onPress={() => setIsInspectMode(!isInspectMode)} style={styles.toolBtn}>
-          <Text style={{ fontSize: 24, opacity: isInspectMode ? 1 : 0.5 }}>🔍</Text>
+          <Image 
+            source={TOOLBAR_ICONS.inspect} 
+            style={{ width: 24, height: 24, opacity: isInspectMode ? 1 : 0.5 }} 
+          />
           <Text style={styles.toolBtnLabel}>Inspect</Text>
         </TouchableOpacity>
       </View>
@@ -484,7 +502,7 @@ const styles = StyleSheet.create({
   slotHintGlow: { borderColor: 'yellow', borderWidth: 3 },
   placedImage: { width: '100%', height: '100%' },
   
-  // ✅ New Easy Slot Positions (Adjust percentages based on your PC case image)
+  // ✅ New Easy Slot Positions
   mbSlotPos: { top: '25%', left: '6%', width: '45%', height: '45%' },
   psuSlotPos: { top: '73%', left: '6%', width: '45%', height: '20%' },
   ddSlotPos: { top: '8%', left: '6%', width: '45%', height: '15%' },
