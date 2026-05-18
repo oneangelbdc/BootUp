@@ -713,7 +713,7 @@ function GameScreen({ navigation, route }) {
       {/* Header: back arrow + menu button */}
       <View style={g.header}>
         <TouchableOpacity style={g.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={g.backText}>←  Back to level selection</Text>
+          <Text style={g.backText}>← Level Select</Text>
         </TouchableOpacity>
         <TouchableOpacity style={g.menuBtn} onPress={() => setMenuVisible(true)}>
           <Text style={g.menuText}>Menu</Text>

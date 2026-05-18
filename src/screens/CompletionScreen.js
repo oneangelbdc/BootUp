@@ -18,16 +18,39 @@ const LESSONS = {
     { icon: '📐', title: 'Layout',
       fact: 'Good UI design ensures every element has proper spacing and hierarchy.' },
   ],
-  BuildThePC: [
-    { icon: '🧠', title: 'CPU',
-      fact: 'The CPU is the brain of the computer — it processes all instructions.' },
-    { icon: '💾', title: 'RAM',
-      fact: 'RAM temporarily stores data so the CPU can access it quickly.' },
-    { icon: '🌀', title: 'Cooling Fan',
-      fact: 'The cooling fan prevents the CPU from overheating during operation.' },
-    { icon: '📀', title: 'SSD',
-      fact: 'An SSD stores your files permanently and is much faster than older hard drives.' },
+  
+  // ✅ NEW: BuildThePC level-specific lessons
+  BuildThePC_easy: [
+    { icon: '🔧', title: 'Motherboard',
+      fact: 'The motherboard is the main circuit board that connects all PC components together.' },
+    { icon: '⚡', title: 'Power Supply',
+      fact: 'The PSU converts wall power to stable DC voltages (3.3V, 5V, 12V) for all components.' },
+    { icon: '💿', title: 'Disk Drive Bay',
+      fact: 'Drive bays hold storage devices like HDDs or SSDs and slide into the PC case.' },
+    { icon: '🖥️', title: 'PC Case Assembly',
+      fact: 'Building a PC starts with installing the motherboard, then PSU, then drives — in that order.' },
   ],
+  BuildThePC_medium: [
+    { icon: '🧠', title: 'CPU',
+      fact: 'The CPU is the brain of the computer — it processes all instructions and calculations.' },
+    { icon: '💾', title: 'RAM',
+      fact: 'RAM temporarily stores data so the CPU can access it quickly without waiting for slower storage.' },
+    { icon: '🎮', title: 'PCI Graphics',
+      fact: 'PCI slots allow expansion cards like GPUs to communicate with the CPU via the motherboard.' },
+    { icon: '🔌', title: 'Component Placement',
+      fact: 'Components must match their slot types — a CPU won\'t fit in a RAM slot, and vice versa.' },
+  ],
+  BuildThePC_hard: [
+    { icon: '🔌', title: 'I/O Interfaces',
+      fact: 'I/O ports (USB, HDMI, Ethernet) let peripherals connect to the PC through the motherboard.' },
+    { icon: '🚀', title: 'PCIe Slots',
+      fact: 'PCIe x16 slots provide 16 high-speed lanes for GPUs; x1/x4/x8 slots support smaller cards.' },
+    { icon: '💽', title: 'SATA Ports',
+      fact: 'SATA ports connect storage drives and optical drives using thin data cables at up to 6 Gbps.' },
+    { icon: '🔋', title: 'CMOS Battery',
+      fact: 'The CMOS battery maintains BIOS settings and system time even when the PC is unplugged.' },
+  ],
+  
   CircuitConnect_easy: [
     {
       title: 'Monitor → DisplayPort Cable',
@@ -42,7 +65,6 @@ const LESSONS = {
       fact: 'A Hard Drive connects to the motherboard via a SATA data cable. SATA III transfers data at up to 6 Gbps — slower than NVMe but still common.',
     },
     {
-
       title: 'Keyboard → USB-A Port',
       fact: 'A wired keyboard plugs into the rectangular USB-A port. USB sends keypress signals to the CPU using just 5 volts — barely more than a phone charger.',
     },
@@ -90,32 +112,24 @@ export default function CompletionScreen({ navigation, route }) {
   const levelKey = route?.params?.levelKey || '';
  
   // ── Lesson picker ──────────────────────────────────────────────────────────
-  // Each game uses its own branch so they can never interfere with each other:
-  //
-  //   CircuitConnect → picks CircuitConnect_<levelKey> (easy / medium / hard)
-  //   DebugInterface → picks LESSONS['DebugInterface']
-  //   BuildThePC     → picks LESSONS['BuildThePC']
-  //   anything else  → falls back to DebugInterface
-  //
-  // Adding a new mini-game: add an `else if (gameId === 'YourGame')` block.
   let lessons;
   if (gameId === 'CircuitConnect') {
-    // levelKey tells us which difficulty was just completed
     lessons = LESSONS[`CircuitConnect_${levelKey}`] || LESSONS['CircuitConnect_easy'];
+  } else if (gameId === 'BuildThePC') {
+    // ✅ NEW: BuildThePC now uses level-specific lessons
+    lessons = LESSONS[`BuildThePC_${levelKey}`] || LESSONS['BuildThePC_medium'];
   } else if (gameId === 'DebugInterface') {
     lessons = LESSONS['DebugInterface'];
-  } else if (gameId === 'BuildThePC') {
-    lessons = LESSONS['BuildThePC'];
   } else {
-    // safe fallback for any future game that hasn't added its LESSONS entry yet
+    // safe fallback
     lessons = LESSONS['DebugInterface'];
   }
  
   // ── Level title for the "Learnings" heading ────────────────────────────────
   const levelName =
-    levelKey === 'easy'   ? 'PC Basics'         :
-    levelKey === 'medium' ? 'Inside the Case'   :
-    levelKey === 'hard'   ? 'Pro Build'          :
+    levelKey === 'easy'   ? 'PC Assembly'       :
+    levelKey === 'medium' ? 'Basic Setup'       :
+    levelKey === 'hard'   ? 'Full Build'        :
     gameId   === 'DebugInterface' ? 'Debug the Interface' :
     gameId   === 'BuildThePC'     ? 'Build the PC'        :
     'Circuit Connect';
@@ -152,7 +166,7 @@ export default function CompletionScreen({ navigation, route }) {
         </View>
         <Text style={styles.dykTitle}>
           {gameId === 'DebugInterface' ? 'Debug the Interface' :
-           gameId === 'BuildThePC' ? 'Build the PC' : 'Circuit Connect'} Learnings
+           gameId === 'BuildThePC' ? `Build the PC — ${levelName}` : 'Circuit Connect'} Learnings
         </Text>
         <Text style={styles.dykSub}>Swipe to reveal what you've learned.</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}

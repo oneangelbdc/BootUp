@@ -29,7 +29,7 @@ export default function InGameMenu({ visible, onClose, onRestart }) {
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.menuBox}>
-          <Text style={styles.menuTitle}>⚙️ Menu</Text>
+          <Text style={styles.menuTitle}>Menu</Text>
 
           <View style={styles.sliderRow}>
             <Text style={styles.icon}>🔊</Text>
@@ -85,13 +85,13 @@ export default function InGameMenu({ visible, onClose, onRestart }) {
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
   menuBox: { backgroundColor: theme.colors.white, borderRadius: theme.radius.lg, padding: 28, width: '80%', alignItems: 'center', elevation: 8 },
-  menuTitle: { fontSize: 20, fontWeight: '800', color: theme.colors.text, marginBottom: 20 },
+  menuTitle: { fontSize: 35, fontWeight: '900', color: theme.colors.text, marginBottom: 20 },
   sliderRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, width: '100%' },
   icon: { fontSize: 24, marginRight: 8 },
-  sliderLabel: { color: theme.colors.textLight, fontSize: 14 },
+  sliderLabel: { color: theme.colors.text, fontSize: 14, fontWeight: 500 },
   slider: { width: '100%', height: 40, marginBottom: 12 },
   btn: { backgroundColor: theme.colors.primary, paddingVertical: 12, paddingHorizontal: 40, borderRadius: theme.radius.sm, marginBottom: 10, width: '100%', alignItems: 'center' },
-  btnText: { color: theme.colors.white, fontWeight: '700', fontSize: 16 },
+  btnText: { color: theme.colors.white, fontWeight: '900', fontSize: 18 },
   closeBtn: { marginTop: 8 },
-  closeText: { color: theme.colors.textLight, fontSize: 14 },
+  closeText: { color: theme.colors.textLight, fontSize: 18 },
 });

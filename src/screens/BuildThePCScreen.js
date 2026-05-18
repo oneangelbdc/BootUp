@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Dimensions,
-  Alert, ScrollView, Image, Modal, SafeAreaView, Platform, ImageBackground, Animated, BackHandler // ✅ Added BackHandler
+  Alert, ScrollView, Image, Modal, SafeAreaView, Platform, ImageBackground, Animated, BackHandler
 } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { theme } from '../styles/theme';
@@ -14,7 +14,7 @@ const BOARD_H = BOARD_W / 0.65;
 const IO_W = BOARD_W * 0.17;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// IMAGE CONSTANTS
+// IMAGE & DATA CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 const PART_IMAGES = {
   // Hard Level (Motherboard)
@@ -39,7 +39,7 @@ const PART_IMAGES = {
   easyRamPlaced: require('../assets/images/easy_ram_placed.png'),
   easyPciPlaced: require('../assets/images/easy_pci_placed.png'),
   
-  // New Easy Level (PC Case)
+  // ✅ NEW: Easy Level (PC Case)
   pcMbInv: require('../assets/images/pc_mb_inventory.png'),
   pcMbPlaced: require('../assets/images/pc_mb_placed.png'),
   pcPsuInv: require('../assets/images/pc_psu_inventory.png'),
@@ -50,9 +50,9 @@ const PART_IMAGES = {
 
 // ✅ NEW: Toolbar Icon Images
 const TOOLBAR_ICONS = {
-  specs: require('../assets/images/icon-clipboard.png'),   // Replace with your actual path
-  hint: require('../assets/images/icon-lightbulb.png'),    // Replace with your actual path
-  inspect: require('../assets/images/icon-magnifying-glass.png') // Replace with your actual path
+  specs: require('../assets/images/icon-clipboard.png'),
+  hint: require('../assets/images/icon-lightbulb.png'),
+  inspect: require('../assets/images/icon-magnifying-glass.png'),
 };
 
 const HARD_PARTS = [
@@ -408,28 +408,35 @@ function GameScreen({ navigation, route }) {
         </TouchableOpacity>
       </ScrollView>
 
+      {/* ✅ UPDATED FOOTER TOOLBAR WITH PNG ICONS + CIRCLES */}
       <View style={styles.footerToolbar}>
-        {/* ✅ Specs Icon */}
-        <TouchableOpacity onPress={() => setShowSpecs(true)} style={styles.toolBtn}>
-          <Image source={TOOLBAR_ICONS.specs} style={{ width: 24, height: 24}} />
+        {/* Specs Button */}
+        <TouchableOpacity onPress={() => setShowSpecs(true)} style={styles.toolBtn} activeOpacity={0.8}>
+          <View style={styles.toolBtnCircle}>
+            <Image source={TOOLBAR_ICONS.specs} style={styles.toolIconImage} />
+          </View>
           <Text style={styles.toolBtnLabel}>Specs</Text>
         </TouchableOpacity>
         
-        {/* ✅ Hint Icon */}
+        {/* Hint Button - Yellow when active */}
         <TouchableOpacity onPress={() => setShowHint(!showHint)} style={styles.toolBtn}>
-          <Image 
-            source={TOOLBAR_ICONS.hint} 
-            style={{ width: 24, height: 24, opacity: showHint ? 1 : 0.5 }} 
-          />
+          <View style={[styles.toolBtnCircle, showHint && styles.toolBtnCircleActive]}>
+            <Image 
+              source={TOOLBAR_ICONS.hint} 
+              style={[styles.toolIconImage, { opacity: showHint ? 1 : 0.6 }]} 
+            />
+          </View>
           <Text style={styles.toolBtnLabel}>Hint</Text>
         </TouchableOpacity>
         
-        {/* ✅ Inspect Icon */}
+        {/* Inspect Button - Yellow when active */}
         <TouchableOpacity onPress={() => setIsInspectMode(!isInspectMode)} style={styles.toolBtn}>
-          <Image 
-            source={TOOLBAR_ICONS.inspect} 
-            style={{ width: 24, height: 24, opacity: isInspectMode ? 1 : 0.5 }} 
-          />
+          <View style={[styles.toolBtnCircle, isInspectMode && styles.toolBtnCircleActive]}>
+            <Image 
+              source={TOOLBAR_ICONS.inspect} 
+              style={[styles.toolIconImage, { opacity: isInspectMode ? 1 : 0.6 }]} 
+            />
+          </View>
           <Text style={styles.toolBtnLabel}>Inspect</Text>
         </TouchableOpacity>
       </View>
@@ -495,7 +502,7 @@ const styles = StyleSheet.create({
   boardWrapper: { flexDirection: 'row', alignItems: 'flex-start', width: BOARD_W + IO_W * 0.25 },
   ioSlotOuter: { width: IO_W, height: BOARD_H * 0.45, marginTop: BOARD_H * 0.01, marginRight: -(IO_W * 0.75), zIndex: 10, borderWidth: 2, borderColor: 'white', borderStyle: 'dashed', backgroundColor: 'rgba(79, 209, 197, 0.05)', borderRadius: 4, overflow: 'hidden' },
   motherboard: { width: BOARD_W, aspectRatio: 0.65, backgroundColor: '#1B4D3E', borderWidth: 2, borderColor: '#0F2E25', borderRadius: 8, overflow: 'hidden', zIndex: 1 },
-  pcCaseStyle: { backgroundColor: '#2C3E50', borderColor: '#4A6572' }, // ✅ Style for new Easy PC background
+  pcCaseStyle: { backgroundColor: '#2C3E50', borderColor: '#4A6572' },
   motherboardImage: { resizeMode: 'stretch' },
   slotBase: { position: 'absolute', borderWidth: 2, borderColor: 'white', borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
   slotFilled: { borderWidth: 0, backgroundColor: 'transparent' },
@@ -540,13 +547,30 @@ const styles = StyleSheet.create({
   partSelected: { borderColor: '#3182CE', borderWidth: 2 },
   inventoryImage: { width: '90%', height: 35, marginBottom: 6 },
   partLabel: { fontSize: 8, color: '#2D3748', textAlign: 'center', fontWeight: 'bold' },
+  
+  // ✅ UPDATED FOOTER TOOLBAR STYLES
   footerToolbar: {
     position: 'absolute', bottom: Platform.OS === 'ios' ? 40 : 30, left: 20, right: 20,
-    height: 70, backgroundColor: '#4299E1', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center',
-    borderRadius: 20, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 4.65,
+    height: 85, backgroundColor: '#4299E1', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center',
+    borderRadius: 25, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 4.65,
+    paddingHorizontal: 10,
   },
-  toolBtn: { padding: 6, alignItems: 'center' },
-  toolBtnLabel: { color: '#FFFFFF', fontSize: 10, fontWeight: '600', marginTop: 2 },
+  toolBtn: { alignItems: 'center' },
+  toolBtnCircle: {
+    width: 50, height: 50, borderRadius: 25,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center', alignItems: 'center',
+    marginBottom: 4,
+    elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.15, shadowRadius: 2,
+  },
+  toolBtnCircleActive: {
+    backgroundColor: '#FFD700', // Yellow/Gold when active
+  },
+  toolIconImage: {
+    width: 24, height: 24,
+  },
+  toolBtnLabel: { color: '#FFFFFF', fontSize: 10, fontWeight: '700', marginTop: 2 },
+  
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 },
   modalContent: { backgroundColor: '#2D3748', borderRadius: 15, padding: 20, maxHeight: '80%' },
   modalTitle: { color: '#FFF', fontSize: 20, fontWeight: 'bold', marginBottom: 15, textAlign: 'center' },
