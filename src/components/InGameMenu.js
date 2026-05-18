@@ -4,11 +4,10 @@ import Slider from '@react-native-community/slider';
 import { theme } from '../styles/theme';
 import AudioManager from '../utils/AudioManager';
 
-export default function InGameMenu({ visible, onClose, onRestart, onSwitchLevel }) {
+export default function InGameMenu({ visible, onClose, onRestart }) {
   const [sfxVolume, setSfxVolume] = useState(AudioManager.sfxVolume);
   const [musicVolume, setMusicVolume] = useState(AudioManager.bgmVolume);
 
-  // Sync volumes when modal opens
   useEffect(() => {
     if (visible) {
       setSfxVolume(AudioManager.sfxVolume);
@@ -72,13 +71,6 @@ export default function InGameMenu({ visible, onClose, onRestart, onSwitchLevel 
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.btn, styles.switchBtn]}
-            onPress={() => { AudioManager.playTap(); onSwitchLevel(); }}
-          >
-            <Text style={styles.btnText}>🔄  Switch Level</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
             style={styles.closeBtn}
             onPress={() => { AudioManager.playTap(); onClose(); }}
           >
@@ -99,7 +91,6 @@ const styles = StyleSheet.create({
   sliderLabel: { color: theme.colors.textLight, fontSize: 14 },
   slider: { width: '100%', height: 40, marginBottom: 12 },
   btn: { backgroundColor: theme.colors.primary, paddingVertical: 12, paddingHorizontal: 40, borderRadius: theme.radius.sm, marginBottom: 10, width: '100%', alignItems: 'center' },
-  switchBtn: { backgroundColor: theme.colors.secondary || '#6B7280' },
   btnText: { color: theme.colors.white, fontWeight: '700', fontSize: 16 },
   closeBtn: { marginTop: 8 },
   closeText: { color: theme.colors.textLight, fontSize: 14 },
