@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react'; // ✅ Added useEffect
 import {
   View, Text, TouchableOpacity,
-  StyleSheet, ScrollView, Dimensions
+  StyleSheet, ScrollView, Dimensions, Image, BackHandler // ✅ Added BackHandler
 } from 'react-native';
 import { theme } from '../styles/theme';
 import AudioManager from '../utils/AudioManager';
@@ -13,33 +13,60 @@ const games = [
     id: 'BuildThePC',
     title: 'Build the PC',
     description: 'Arrange slot components onto the motherboard',
-    icon: '🖥️',
+    image: require('../assets/images/menu-icon-buildpc.png'), 
     screen: 'BuildThePC',
   },
   {
     id: 'CircuitConnect',
     title: 'Circuit Connect',
     description: 'Connect wires correctly',
-    icon: '🔌',
+    image: require('../assets/images/menu-icon-circuit.png'), 
     screen: 'CircuitConnect',
   },
   {
     id: 'DebugInterface',
     title: 'Debug the Interface',
     description: 'Find & fix all visual glitches',
-    icon: '🐛',
+    image: require('../assets/images/menu-icon-debug.png'), 
     screen: 'DebugInterface',
   },
 ];
 
 export default function MenuScreen({ navigation }) {
+  // ✅ Hardware back button: go to StartScreen (matches universal header back button)
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        navigation.navigate('Start');
+        return true; // Prevent default exit
+      }
+    );
+    return () => backHandler.remove();
+  }, [navigation]);
+
   return (
     <View style={styles.container}>
       <View style={styles.decorCircle} />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.heading}>Choose</Text>
-        <Text style={styles.headingAccent}>Mission</Text>
-        <Text style={styles.subheading}>3 mini-games to boot the system</Text>
+        {/* ✅ Title as PNG images */}
+        <Image 
+          source={require('../assets/images/menu-choose-text.png')} 
+          style={styles.headingImage}
+          resizeMode="contain"
+        />
+        <Image 
+          source={require('../assets/images/menu-mission-text.png')} 
+          style={styles.headingAccentImage}
+          resizeMode="contain"
+        />
+        
+        {/* ✅ Subtitle as PNG image */}
+        <Image 
+          source={require('../assets/images/menu-subheading-text.png')} 
+          style={styles.subheadingImage}
+          resizeMode="contain"
+        />
         
         {games.map((game) => (
           <TouchableOpacity
@@ -47,13 +74,16 @@ export default function MenuScreen({ navigation }) {
             style={styles.card}
             onPress={() => {
               AudioManager.playTap();
-              // Directly navigate to the game screen.
-              // Level selection is handled inside the game screen now.
               navigation.navigate(game.screen, { gameId: game.id });
             }}
             activeOpacity={0.85}
           >
-            <Text style={styles.cardIcon}>{game.icon}</Text>
+            {/* ✅ Render PNG image instead of emoji text */}
+            <Image
+              source={game.image}
+              style={styles.cardIcon}
+              resizeMode="contain"
+            />
             <View style={styles.cardText}>
               <Text style={styles.cardTitle}>{game.title}</Text>
               <Text style={styles.cardDesc}>{game.description}</Text>
@@ -76,18 +106,27 @@ const styles = StyleSheet.create({
     opacity: 0.2,
   },
   scroll: { padding: 24, paddingTop: 80, alignItems: 'center' },
-  heading: {
-    fontSize: 42, fontWeight: '900',
-    color: theme.colors.primary, letterSpacing: 2,
+  
+  // ✅ Image styles for menu header
+  headingImage: {
+    width: 220,
+    height: 55,
+    marginTop: -20,
+    marginBottom: 0,
   },
-  headingAccent: {
-    fontSize: 42, fontWeight: '900',
-    color: theme.colors.primary, letterSpacing: 2, marginTop: -10,
+  headingAccentImage: {
+    width: 250,
+    height: 62.5,
+    marginTop: 10,
+    marginBottom: 8,
   },
-  subheading: {
-    fontSize: theme.fonts.body, color: theme.colors.textLight,
-    letterSpacing: 2, marginBottom: 32, marginTop: 8,
+  subheadingImage: {
+    width: 315,
+    height: 45,
+    marginTop: 20,
+    marginBottom: 32,
   },
+  
   card: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: theme.colors.white,
@@ -98,7 +137,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1, shadowRadius: 4,
   },
-  cardIcon: { fontSize: 36, marginRight: 16 },
+  // ✅ Updated for PNG icons (adjust width/height as needed)
+  cardIcon: { width: 48, height: 48, marginRight: 16 },
   cardText: { flex: 1 },
   cardTitle: {
     fontSize: theme.fonts.heading,

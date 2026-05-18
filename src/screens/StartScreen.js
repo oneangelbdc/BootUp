@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity,
-  StyleSheet, Animated, Dimensions
+  StyleSheet, Animated, Dimensions, Image
 } from 'react-native';
 import { theme } from '../styles/theme';
 import AudioManager from '../utils/AudioManager';
@@ -26,29 +26,50 @@ export default function StartScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.decorCircle} />
-      <Animated.View style={[styles.iconContainer,
+      
+      {/* ✅ Mid-top design image */}
+      <Animated.View style={[styles.midTopContainer,
         { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
       ]}>
-        <Text style={styles.circuitIcon}>⚡</Text>
+        <Image 
+          source={require('../assets/images/starting-page-midtop-design.png')} 
+          style={styles.midTopImage}
+          resizeMode="contain"
+        />
       </Animated.View>
+      
       <Animated.View style={[styles.titleContainer,
         { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
       ]}>
-        <Text style={styles.titleBoot}>BOOT</Text>
-        <Text style={styles.titleUp}>UP!</Text>
-        <Text style={styles.subtitle}>FIX • CONNECT • BUILD</Text>
+        {/* ✅ Title as PNG image */}
+        <Image 
+          source={require('../assets/images/boot-up-title.png')} 
+          style={styles.titleImage}
+          resizeMode="contain"
+        />
+        
+        {/* ✅ Subtitle as PNG image */}
+        <Image 
+          source={require('../assets/images/fix-connect-build.png')} 
+          style={styles.subtitleImage}
+          resizeMode="contain"
+        />
       </Animated.View>
+
       <Animated.View style={{ opacity: fadeAnim }}>
-        <TouchableOpacity
-          style={styles.playButton}
-          onPress={() => {
-            AudioManager.playTap();
-            navigation.navigate('Menu');
-          }}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.playText}>PLAY</Text>
-        </TouchableOpacity>
+        {/* 3D Button Container */}
+        <View style={styles.button3DContainer}>
+          <TouchableOpacity
+            style={styles.playButton}
+            onPress={() => {
+              AudioManager.playTap();
+              navigation.navigate('Menu');
+            }}
+            activeOpacity={0.9}
+          >
+            <Text style={styles.playText}>PLAY</Text>
+          </TouchableOpacity>
+        </View>
       </Animated.View>
     </View>
   );
@@ -69,31 +90,62 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     opacity: 0.25,
   },
-  iconContainer: { marginBottom: 20 },
-  circuitIcon: { fontSize: 60 },
-  titleContainer: { alignItems: 'center', marginBottom: 50 },
-  titleBoot: {
-    fontSize: 64, fontWeight: '900',
-    color: theme.colors.primary, letterSpacing: 4,
+  
+  // ✅ Mid-top design container & image styles
+  midTopContainer: {
+    position: 'absolute',
+    top: 40,
+    alignSelf: 'center',
+    zIndex: 1,
   },
-  titleUp: {
-    fontSize: 64, fontWeight: '900',
-    color: theme.colors.primary, letterSpacing: 4, marginTop: -20,
+  midTopImage: {
+    width: 300,
+    height: 100,
   },
-  subtitle: {
-    fontSize: theme.fonts.body, color: theme.colors.textLight,
-    letterSpacing: 3, marginTop: 8,
+  
+  titleContainer: { 
+    alignItems: 'center', 
+    marginBottom: 50, 
+    marginTop: 30 
+  },
+  
+  // ✅ Image styles for title & subtitle
+  titleImage: {
+    width: 600,
+    height: 160,
+    marginBottom: 10,
+  },
+  subtitleImage: {
+    width: 250,
+    height: 40,
+  },
+  
+  // ✅ 3D Button Styles
+  button3DContainer: {
+    backgroundColor: '#3A9BD4', // Darker blue for the 3D edge
+    borderRadius: theme.radius.md,
+    paddingBottom: 6, // Creates the 3D depth
+    paddingLeft: 2,
+    paddingRight: 2,
+    paddingTop: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
   },
   playButton: {
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 60, paddingVertical: 16,
-    borderRadius: theme.radius.md, elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2, shadowRadius: 4,
+    backgroundColor: theme.colors.primary, // Lighter blue for top surface
+    paddingHorizontal: 60,
+    paddingVertical: 16,
+    borderRadius: theme.radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   playText: {
-    color: theme.colors.white, fontSize: 18,
-    fontWeight: '700', letterSpacing: 3,
+    color: theme.colors.black,
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 3,
   },
 });

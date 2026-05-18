@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Dimensions,
-  Alert, ScrollView, Image, Modal, SafeAreaView, Platform, ImageBackground, Animated
+  Alert, ScrollView, Image, Modal, SafeAreaView, Platform, ImageBackground, Animated, BackHandler
 } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { theme } from '../styles/theme';
@@ -108,9 +108,6 @@ function LevelSelectScreen({ navigation }) {
     <View style={ls.container}>
       <View style={ls.decorCircle} />
       <View style={ls.header}>
-        <TouchableOpacity style={ls.backBtn} onPress={() => navigation.navigate('Menu')}>
-          <Text style={ls.backText}>←</Text>
-        </TouchableOpacity>
         <View>
           <Text style={ls.headerTitle}>Build The PC</Text>
           <Text style={ls.headerSub}>Choose your difficulty</Text>
@@ -146,7 +143,10 @@ function LevelCard({ level, onPress }) {
                 <Text style={[ls.badgeText, { color: level.badgeColor }]}>{level.badge}</Text>
               </View>
               <Text style={ls.cardTitle}>{level.title}</Text>
-              <Text style={ls.stars}>{filledStars}<Text style={{ color: '#94A3B8' }}>{emptyStars}</Text></Text>
+              <Text style={ls.stars}>
+                <Text style={{ color: level.accentColor }}>{filledStars}</Text>
+                <Text style={{ color: '#D3D1C7' }}>{emptyStars}</Text>
+              </Text>
             </View>
             <View style={ls.arrowWrap}><Text style={[ls.arrow, { color: level.accentColor }]}>›</Text></View>
           </View>
@@ -240,14 +240,9 @@ function GameScreen({ navigation, route }) {
         onPress={() => handleSlotPress(slotName, label)}
         activeOpacity={0.8}
       >
-        {isPlaced ? (
+        {/* ✅ REMOVED: Text badges for empty easy slots. Only shows image if placed. */}
+        {isPlaced && (
           <Image source={PART_IMAGES[imgKey]} style={styles.placedImage} resizeMode="stretch" />
-        ) : (
-          isEasy && (
-            <View style={styles.easyTextBadge}>
-              <Text style={styles.easySlotText}>{label}</Text>
-            </View>
-          )
         )}
       </TouchableOpacity>
     );
@@ -270,7 +265,8 @@ function GameScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.safeContainer}>
-      {/* ✅ UPDATED: Matches CircuitConnectScreen header pattern */}
+      <View style={styles.decorCircle} />
+      
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Text style={styles.backText}>← Back to level selection</Text>
@@ -388,24 +384,28 @@ function GameScreen({ navigation, route }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STYLES
-// ────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  safeContainer: { flex: 1, backgroundColor: '#1A202C' },
+  safeContainer: { flex: 1, backgroundColor: theme.colors.background },
+  decorCircle: {
+    position: 'absolute', top: -40, right: -40,
+    width: 160, height: 160, borderRadius: 80,
+    backgroundColor: theme.colors.primary, opacity: 0.12,
+  },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 10 },
-  backBtn: { backgroundColor: theme.colors.white, padding: 10, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 },
+  backBtn: { backgroundColor: theme.colors.white, padding: 10, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3, marginTop: 15 },
   backText: { fontWeight: '700', color: theme.colors.text, fontSize: 13 },
-  menuBtn: { backgroundColor: theme.colors.white, padding: 10, paddingHorizontal: 20, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 },
+  menuBtn: { backgroundColor: theme.colors.white, padding: 10, paddingHorizontal: 20, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3, marginTop: 15 },
   menuText: { fontWeight: '700', color: theme.colors.text },
-  
   scrollContent: { paddingVertical: 20, alignItems: 'center' },
   boardWrapper: { flexDirection: 'row', alignItems: 'flex-start', width: BOARD_W + IO_W * 0.25 },
-  ioSlotOuter: { width: IO_W, height: BOARD_H * 0.45, marginTop: BOARD_H * 0.01, marginRight: -(IO_W * 0.75), zIndex: 10, borderWidth: 1, borderColor: '#4FD1C5', borderStyle: 'dashed', backgroundColor: 'rgba(79, 209, 197, 0.05)', borderRadius: 4, overflow: 'hidden' },
+  ioSlotOuter: { width: IO_W, height: BOARD_H * 0.45, marginTop: BOARD_H * 0.01, marginRight: -(IO_W * 0.75), zIndex: 10, borderWidth: 2, borderColor: 'white', borderStyle: 'dashed', backgroundColor: 'rgba(79, 209, 197, 0.05)', borderRadius: 4, overflow: 'hidden' },
   motherboard: { width: BOARD_W, aspectRatio: 0.65, backgroundColor: '#1B4D3E', borderWidth: 2, borderColor: '#0F2E25', borderRadius: 8, overflow: 'hidden', zIndex: 1 },
   easyMotherboardExtra: { backgroundColor: '#2D3748', borderColor: '#4A5568' },
   motherboardImage: { resizeMode: 'stretch' },
-  slotBase: { position: 'absolute', borderWidth: 1, borderColor: '#4FD1C5', borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
+  slotBase: { position: 'absolute', borderWidth: 2, borderColor: 'white', borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
   slotFilled: { borderWidth: 0, backgroundColor: 'transparent' },
-  slotHintGlow: { borderColor: '#FFFFFF', borderWidth: 3 },
+  slotHintGlow: { borderColor: 'yellow', borderWidth: 3 },
   easyTextBadge: { backgroundColor: '#ADD8E6', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 6 },
   easySlotText: { color: '#2C5282', fontSize: 11, fontWeight: '900', textAlign: 'center' },
   placedImage: { width: '100%', height: '100%' },
@@ -428,11 +428,11 @@ const styles = StyleSheet.create({
   pchSlot: { top: '58%', left: '59%', width: '28%', height: '22%' },
   sataSlot: { top: '69%', left: '93%', width: '7%', height: '15%' },
   cmosSlot: { top: '86%', left: '89%', width: '10%', height: '7%', borderRadius: 100 },
-  navBanner: { marginBottom: 15, paddingVertical: 8, paddingHorizontal: 20, backgroundColor: 'rgba(66, 153, 225, 0.9)', borderRadius: 20, borderWidth: 1, borderColor: '#FFF' },
+  navBanner: { marginBottom: 5, paddingVertical: 8, paddingHorizontal: 20, backgroundColor: 'rgba(66, 153, 225, 0.9)', borderRadius: 20, borderWidth: 1, borderColor: '#FFF' },
   bottomBanner: { marginTop: 10, marginBottom: 160 },
   navBannerText: { color: '#FFF', fontSize: 11, fontWeight: 'bold' },
   inventoryContainer: { width: '100%', padding: 15, marginTop: 10 },
-  inventoryLabel: { fontSize: 12, color: '#E2E8F0', textAlign: 'center', marginBottom: 10 },
+  inventoryLabel: { fontSize: 12, color: '#000000', textAlign: 'center', marginBottom: 10 },
   inventory: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
   partCard: { backgroundColor: '#FFFFFF', borderRadius: 8, padding: 8, width: SCREEN_W * 0.26, alignItems: 'center' },
   partPlaced: { opacity: 0.3 },
@@ -457,12 +457,14 @@ const styles = StyleSheet.create({
 
 const ls = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background, paddingTop: 50 },
-  decorCircle: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: theme.colors.primary, opacity: 0.12 },
+  decorCircle: {
+    position: 'absolute', top: -40, right: -40,
+    width: 160, height: 160, borderRadius: 80,
+    backgroundColor: theme.colors.primary, opacity: 0.12,
+  },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 20, gap: 12 },
-  backBtn: { backgroundColor: theme.colors.white, padding: 10, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 },
-  backText: { fontSize: 18, color: theme.colors.text },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
-  headerSub: { fontSize: 12, color: theme.colors.textLight, marginTop: 1 },
+  headerTitle: { fontSize: 33, fontWeight: '700', color: theme.colors.text, marginTop: -20},
+  headerSub: { fontSize: 22, color: theme.colors.textLight, marginTop: 1 },
   list: { paddingHorizontal: 16 },
   card: { backgroundColor: theme.colors.white, borderRadius: 16, borderWidth: 1.5, flexDirection: 'row', overflow: 'hidden', elevation: 3, marginBottom: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6 },
   cardBar: { width: 5 },
@@ -471,7 +473,7 @@ const ls = StyleSheet.create({
   cardTopLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   badge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
   badgeText: { fontSize: 10, fontWeight: '800', letterSpacing: 1 },
-  stars: { fontSize: 14, letterSpacing: 2 },
+  stars: { fontSize: 14, letterSpacing: 2 , marginBottom: 6},
   pairsPill: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
   pairsText: { fontSize: 11, fontWeight: '700' },
   cardTitle: { fontSize: 16, fontWeight: '700', color: theme.colors.text, marginBottom: 4 },
@@ -487,8 +489,19 @@ const ls = StyleSheet.create({
 // ROOT EXPORT
 // ─────────────────────────────────────────────────────────────────────────────
 const Stack = createNativeStackNavigator();
-
 export default function BuildThePCScreen({ navigation }) {
+  // ✅ HARDWARE BACK BUTTON: Intercepts Android back press and goes to Menu
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        navigation.navigate('Menu');
+        return true; // Prevents default Android behavior (exiting app)
+      }
+    );
+    return () => backHandler.remove();
+  }, [navigation]);
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="PCLevels">
