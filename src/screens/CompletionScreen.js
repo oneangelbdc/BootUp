@@ -28,24 +28,101 @@ const LESSONS = {
     { icon: '📀', title: 'SSD',
       fact: 'An SSD stores your files permanently and is much faster than older hard drives.' },
   ],
-  CircuitConnect: [
-    { icon: '🖥️', title: 'Monitor',
-      fact: 'The monitor displays visual output from the computer via HDMI or DisplayPort.' },
-    { icon: '📡', title: 'Router',
-      fact: 'A router connects devices to the internet and manages network traffic.' },
-    { icon: '🗄️', title: 'Server',
-      fact: 'Servers store and serve data to other computers over a network.' },
-    { icon: '🔌', title: 'Power',
-      fact: 'Every device needs a stable power connection to function correctly.' },
+  CircuitConnect_easy: [
+    {
+      title: 'Monitor → DisplayPort Cable',
+      fact: 'The monitor receives video from the GPU through a DisplayPort or HDMI cable. DisplayPort supports up to 8K resolution and 240 Hz refresh rates.',
+    },
+    {
+      title: 'CPU → CPU Socket',
+      fact: 'The CPU slots into the CPU Socket on the motherboard (e.g. LGA1700 or AM5). The socket\'s hundreds of pins carry power and data to the processor.',
+    },
+    {
+      title: 'Hard Drive → SATA Cable',
+      fact: 'A Hard Drive connects to the motherboard via a SATA data cable. SATA III transfers data at up to 6 Gbps — slower than NVMe but still common.',
+    },
+    {
+
+      title: 'Keyboard → USB-A Port',
+      fact: 'A wired keyboard plugs into the rectangular USB-A port. USB sends keypress signals to the CPU using just 5 volts — barely more than a phone charger.',
+    },
+  ],
+  CircuitConnect_medium: [
+    {
+      title: 'Graphics Card → PCIe x16 Slot',
+      fact: 'The GPU seats into the long PCIe x16 slot on the motherboard. It provides 16 high-speed lanes — the most bandwidth of any slot on the board.',
+    },
+    {
+      title: 'RAM Stick → DIMM Slot',
+      fact: 'RAM sticks click into DIMM slots. A notch prevents backward insertion. DDR5 slots are not compatible with DDR4 sticks — the notch position is different.',
+    },
+    {
+      title: 'Power Supply → 24-pin ATX',
+      fact: 'The PSU powers the motherboard through the wide 24-pin ATX connector. It supplies 3.3V, 5V, and 12V rails to run every component on the board.',
+    },
+    {
+      title: 'CPU Cooler → CPU (top)',
+      fact: 'The CPU Cooler mounts directly on top of the CPU to draw heat away from the processor. Without it, a modern CPU would overheat and shut down in seconds.',
+    },
+  ],
+  CircuitConnect_hard: [
+    {
+      title: 'NVMe SSD → M.2 Slot',
+      fact: 'An NVMe SSD slides into the M.2 slot and uses the PCIe bus directly, reaching 7,000+ MB/s — over 10× faster than a SATA hard drive.',
+    },
+    {
+      title: 'Thermal Paste → CPU IHS',
+      fact: 'Thermal paste is applied to the CPU\'s IHS (Integrated Heat Spreader) before mounting the cooler. It fills microscopic air gaps that would otherwise trap heat.',
+    },
+    {
+      title: 'Case Fan → Fan Header (4-pin)',
+      fact: 'Case fans plug into 4-pin PWM Fan Headers on the motherboard. This lets the system automatically adjust fan speed based on temperature — quieter at idle.',
+    },
+    {
+      title: 'Wi-Fi Card → PCIe x1 Slot',
+      fact: 'Wi-Fi cards use the short PCIe x1 slot — not the long x16 slot reserved for GPUs. PCIe x1 provides 1 lane of bandwidth, enough for wireless speeds.',
+    },
   ],
 };
 
 export default function CompletionScreen({ navigation, route }) {
-  const gameId = route?.params?.gameId || 'DebugInterface';
-  const lessons = LESSONS[gameId] || LESSONS['DebugInterface'];
+  const gameId   = route?.params?.gameId   || '';
+  const levelKey = route?.params?.levelKey || '';
+ 
+  // ── Lesson picker ──────────────────────────────────────────────────────────
+  // Each game uses its own branch so they can never interfere with each other:
+  //
+  //   CircuitConnect → picks CircuitConnect_<levelKey> (easy / medium / hard)
+  //   DebugInterface → picks LESSONS['DebugInterface']
+  //   BuildThePC     → picks LESSONS['BuildThePC']
+  //   anything else  → falls back to DebugInterface
+  //
+  // Adding a new mini-game: add an `else if (gameId === 'YourGame')` block.
+  let lessons;
+  if (gameId === 'CircuitConnect') {
+    // levelKey tells us which difficulty was just completed
+    lessons = LESSONS[`CircuitConnect_${levelKey}`] || LESSONS['CircuitConnect_easy'];
+  } else if (gameId === 'DebugInterface') {
+    lessons = LESSONS['DebugInterface'];
+  } else if (gameId === 'BuildThePC') {
+    lessons = LESSONS['BuildThePC'];
+  } else {
+    // safe fallback for any future game that hasn't added its LESSONS entry yet
+    lessons = LESSONS['DebugInterface'];
+  }
+ 
+  // ── Level title for the "Learnings" heading ────────────────────────────────
+  const levelName =
+    levelKey === 'easy'   ? 'PC Basics'         :
+    levelKey === 'medium' ? 'Inside the Case'   :
+    levelKey === 'hard'   ? 'Pro Build'          :
+    gameId   === 'DebugInterface' ? 'Debug the Interface' :
+    gameId   === 'BuildThePC'     ? 'Build the PC'        :
+    'Circuit Connect';
+ 
   const scaleAnim = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
+  const fadeAnim  = useRef(new Animated.Value(0)).current;
+ 
   useEffect(() => {
     Animated.sequence([
       Animated.spring(scaleAnim, {
