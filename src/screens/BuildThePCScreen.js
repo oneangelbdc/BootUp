@@ -14,9 +14,10 @@ const BOARD_H = BOARD_W / 0.65;
 const IO_W = BOARD_W * 0.17;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ORIGINAL CONSTANTS (Unchanged)
+// IMAGE & DATA CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 const PART_IMAGES = {
+  // Hard Level (Motherboard)
   ioSlot: require('../assets/images/io_interface.png'),
   cpuSlot: require('../assets/images/cpu_processor.png'),
   ramSlot: require('../assets/images/ram_module.png'),
@@ -29,15 +30,25 @@ const PART_IMAGES = {
   pchSlot: require('../assets/images/pch_chipset.png'),
   sataSlot: require('../assets/images/sata_ports.png'),
   cmosSlot: require('../assets/images/cmos_battery.png'),
+  
+  // Medium Level (Old Easy)
   easyCpuInv: require('../assets/images/easy_cpu_inventory.png'),
   easyRamInv: require('../assets/images/easy_ram_inventory.png'),
   easyPciInv: require('../assets/images/easy_pci_inventory.png'),
   easyCpuPlaced: require('../assets/images/easy_cpu_placed.png'),
   easyRamPlaced: require('../assets/images/easy_ram_placed.png'),
   easyPciPlaced: require('../assets/images/easy_pci_placed.png'),
+  
+  // ✅ NEW: Easy Level (PC Case)
+  pcMbInv: require('../assets/images/pc_mb_inventory.png'),
+  pcMbPlaced: require('../assets/images/pc_mb_placed.png'),
+  pcPsuInv: require('../assets/images/pc_psu_inventory.png'),
+  pcPsuPlaced: require('../assets/images/pc_psu_placed.png'),
+  pcDdInv: require('../assets/images/pc_dd_inventory.png'),
+  pcDdPlaced: require('../assets/images/pc_dd_placed.png'),
 };
 
-const PARTS = [
+const HARD_PARTS = [
   { id: 'IO', label: 'I/O Interfaces', type: 'IO', imgKey: 'ioSlot', desc: 'Input/Output ports for peripherals.' },
   { id: 'CPU', label: 'CPU Socket', type: 'CPU', imgKey: 'cpuSlot', desc: 'Processor socket.' },
   { id: 'MEM1', label: 'Memory Slot 1', type: 'RAM', imgKey: 'ramSlot', desc: 'RAM slot.' },
@@ -57,45 +68,65 @@ const PARTS = [
   { id: 'CMOS', label: 'CMOS Battery', type: 'CMOS', imgKey: 'cmosSlot', desc: 'Maintains BIOS settings.' },
 ];
 
-const EASY_PARTS = [
+const MEDIUM_PARTS = [
   { id: 'CPU_E', label: 'CPU Processor', type: 'CPU', imgKey: 'easyCpuInv', placedImgKey: 'easyCpuPlaced', desc: 'The brain of the PC.' },
   { id: 'MEM_E', label: 'RAM Memory', type: 'RAM', imgKey: 'easyRamInv', placedImgKey: 'easyRamPlaced', desc: 'Short-term memory.' },
   { id: 'PCI_E', label: 'PCI Graphics', type: 'PCI', imgKey: 'easyPciInv', placedImgKey: 'easyPciPlaced', desc: 'Handles visuals.' },
 ];
 
 const SLOT_REQUIREMENTS = {
+  // ✅ New Easy
+  mbSlot: 'MB', psuSlot: 'PSU', ddSlot: 'DD',
+  // Medium
+  easyCPU: 'CPU', easyRAM: 'RAM', easyPCI: 'PCI',
+  // Hard
   ioSlot: 'IO', cpuSlot: 'CPU', pwrSlot: 'PWR', pciEx16: 'PX16', pciEx4: 'PX4', pciEx8: 'PX8',
   pchSlot: 'PCH', sataSlot: 'SATA', cmosSlot: 'CMOS', mem1Slot: 'RAM', mem2Slot: 'RAM',
   mem3Slot: 'RAM', mem4Slot: 'RAM', pciEx1_1: 'PX1', pciEx1_2: 'PX1', pciL1: 'LPCI', pciL2: 'LPCI',
-  easyCPU: 'CPU', easyRAM: 'RAM', easyPCI: 'PCI'
 };
 
 // ────────────────────────────────────────────────────────────────────────────
-// LEVEL CONFIGURATION
+// LEVEL CONFIGURATION (Restructured)
 // ─────────────────────────────────────────────────────────────────────────────
 const LEVELS = {
   easy: {
     key: 'easy',
     badge: 'EASY',
-    title: 'Basic Setup',
-    desc: 'Build a simple PC with essential components. Perfect for beginners!',
+    title: 'PC Assembly',
+    desc: 'Install the core components into the PC case.',
     stars: 1,
     badgeColor: '#2D6A0F',
     badgeBg: '#E3F5D5',
     accentColor: '#7DC952',
-    parts: EASY_PARTS,
+    parts: [
+      { id: 'MB_E', label: 'Motherboard', type: 'MB', imgKey: 'pcMbInv', placedImgKey: 'pcMbPlaced', desc: 'Main circuit board.' },
+      { id: 'PSU_E', label: 'Power Supply', type: 'PSU', imgKey: 'pcPsuInv', placedImgKey: 'pcPsuPlaced', desc: 'Provides power to all components.' },
+      { id: 'DD_E', label: 'Disk Drive', type: 'DD', imgKey: 'pcDdInv', placedImgKey: 'pcDdPlaced', desc: 'Storage drive bay.' },
+    ],
+    hints: ['Start with the Motherboard!', 'Slot in the Power Supply.', 'Slide the Disk Drive into the bay.'],
+  },
+  medium: {
+    key: 'medium',
+    badge: 'MEDIUM',
+    title: 'Basic Setup',
+    desc: 'Build a simple PC with essential components. Perfect for beginners!',
+    stars: 2,
+    badgeColor: '#7A4508',
+    badgeBg: '#FDE8C8',
+    accentColor: '#E89020',
+    parts: MEDIUM_PARTS,
     hints: ['Start with the CPU!', 'RAM goes next to it.', 'PCI handles visuals.'],
   },
-  normal: {
-    key: 'normal',
-    badge: 'STANDARD',
+  hard: {
+    key: 'hard',
+    badge: 'HARD',
     title: 'Full Build',
     desc: 'Assemble a complete motherboard with all standard components.',
-    stars: 2,
-    badgeColor: '#B45309',
-    badgeBg: '#FEF3C7',
-    accentColor: '#F59E0B',
-    parts: PARTS,
+    stars: 3,
+    badgeColor: '#8B1F1F',
+    badgeBg: '#FADFDF',
+    accentColor: '#D94444',
+    parts: HARD_PARTS,
     hints: ['I/O goes on the left.', 'CPU is in the center.', 'Match the slot types carefully.'],
   },
 };
@@ -171,8 +202,11 @@ function LevelCard({ level, onPress }) {
 function GameScreen({ navigation, route }) {
   const { levelKey } = route.params;
   const level = LEVELS[levelKey];
-  const isEasy = levelKey === 'easy';
   const currentPartsList = level.parts;
+
+  const isNewEasy = levelKey === 'easy';
+  const isMedium = levelKey === 'medium';
+  const isHard = levelKey === 'hard';
 
   const scrollRef = useRef(null);
   const [placedParts, setPlacedParts] = useState({});
@@ -222,7 +256,7 @@ function GameScreen({ navigation, route }) {
     }
     if (placedParts[slotName]) return;
 
-    const imageToUse = isEasy && selectedPart.placedImgKey ? selectedPart.placedImgKey : selectedPart.imgKey;
+    const imageToUse = selectedPart.placedImgKey || selectedPart.imgKey;
     setPlacedParts(prev => ({ ...prev, [slotName]: imageToUse }));
     setPlacedPartIds(prev => [...prev, selectedPart.id]);
     setSelectedPart(null);
@@ -240,7 +274,7 @@ function GameScreen({ navigation, route }) {
         onPress={() => handleSlotPress(slotName, label)}
         activeOpacity={0.8}
       >
-        {/* ✅ REMOVED: Text badges for empty easy slots. Only shows image if placed. */}
+        {/* ✅ Only renders image when placed. Empty slots show dashed borders. */}
         {isPlaced && (
           <Image source={PART_IMAGES[imgKey]} style={styles.placedImage} resizeMode="stretch" />
         )}
@@ -263,6 +297,13 @@ function GameScreen({ navigation, route }) {
     );
   };
 
+  // Background selection based on level
+  const bgSource = isNewEasy
+    ? require('../assets/images/pc_case_bg.png')
+    : isMedium
+    ? require('../assets/images/easy_motherboard.png')
+    : require('../assets/images/motherboard_bg.png');
+
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.decorCircle} />
@@ -276,19 +317,40 @@ function GameScreen({ navigation, route }) {
         </TouchableOpacity>
       </View>
 
+      {/* ✅ Progress Status Bar */}
+      <View style={styles.statusBar}>
+        <View style={styles.statusLeft}>
+          <View style={[styles.statusDot, {
+            backgroundColor: placedPartIds.length === currentPartsList.length ? '#1D9E75' : level.accentColor,
+          }]} />
+          <Text style={styles.statusText}>BUILD THE PC</Text>
+        </View>
+        <View style={[styles.levelPill, { backgroundColor: level.badgeBg }]}>
+          <Text style={[styles.levelPillText, { color: level.badgeColor }]}>
+            {level.badge}  {placedPartIds.length}/{currentPartsList.length}
+          </Text>
+        </View>
+      </View>
+
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <TouchableOpacity style={styles.navBanner} onPress={scrollToInventory} activeOpacity={0.7}>
           <Text style={styles.navBannerText}>Go To Inventory ↓</Text>
         </TouchableOpacity>
 
         <View style={styles.boardWrapper}>
-          {!isEasy && renderIOSlot()}
+          {isHard && renderIOSlot()}
           <ImageBackground
-            source={isEasy ? require('../assets/images/easy_motherboard.png') : require('../assets/images/motherboard_bg.png')}
-            style={[styles.motherboard, isEasy && styles.easyMotherboardExtra]}
+            source={bgSource}
+            style={[styles.motherboard, isNewEasy && styles.pcCaseStyle]}
             imageStyle={styles.motherboardImage}
           >
-            {isEasy ? (
+            {isNewEasy ? (
+              <>
+                {renderSlot('mbSlot', styles.mbSlotPos, 'Motherboard')}
+                {renderSlot('psuSlot', styles.psuSlotPos, 'Power Supply')}
+                {renderSlot('ddSlot', styles.ddSlotPos, 'Disk Drive')}
+              </>
+            ) : isMedium ? (
               <>
                 {renderSlot('easyCPU', styles.easyCPUPos, 'CPU')}
                 {renderSlot('easyRAM', styles.easyRAMPos, 'MEMORY')}
@@ -397,21 +459,42 @@ const styles = StyleSheet.create({
   backText: { fontWeight: '700', color: theme.colors.text, fontSize: 13 },
   menuBtn: { backgroundColor: theme.colors.white, padding: 10, paddingHorizontal: 20, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3, marginTop: 15 },
   menuText: { fontWeight: '700', color: theme.colors.text },
+
+  // ✅ Status Bar Styles
+  statusBar: { 
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', 
+    backgroundColor: theme.colors.white, marginHorizontal: 16, padding: 10, 
+    borderRadius: theme.radius.sm, marginBottom: 6, elevation: 2, 
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 3 
+  },
+  statusLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  statusDot: { width: 10, height: 10, borderRadius: 5 },
+  statusText: { fontSize: 11, fontWeight: '700', letterSpacing: 1, color: theme.colors.text },
+  levelPill: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
+  levelPillText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
+
   scrollContent: { paddingVertical: 20, alignItems: 'center' },
   boardWrapper: { flexDirection: 'row', alignItems: 'flex-start', width: BOARD_W + IO_W * 0.25 },
   ioSlotOuter: { width: IO_W, height: BOARD_H * 0.45, marginTop: BOARD_H * 0.01, marginRight: -(IO_W * 0.75), zIndex: 10, borderWidth: 2, borderColor: 'white', borderStyle: 'dashed', backgroundColor: 'rgba(79, 209, 197, 0.05)', borderRadius: 4, overflow: 'hidden' },
   motherboard: { width: BOARD_W, aspectRatio: 0.65, backgroundColor: '#1B4D3E', borderWidth: 2, borderColor: '#0F2E25', borderRadius: 8, overflow: 'hidden', zIndex: 1 },
-  easyMotherboardExtra: { backgroundColor: '#2D3748', borderColor: '#4A5568' },
+  pcCaseStyle: { backgroundColor: '#2C3E50', borderColor: '#4A6572' }, // ✅ Style for new Easy PC background
   motherboardImage: { resizeMode: 'stretch' },
   slotBase: { position: 'absolute', borderWidth: 2, borderColor: 'white', borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
   slotFilled: { borderWidth: 0, backgroundColor: 'transparent' },
   slotHintGlow: { borderColor: 'yellow', borderWidth: 3 },
-  easyTextBadge: { backgroundColor: '#ADD8E6', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 6 },
-  easySlotText: { color: '#2C5282', fontSize: 11, fontWeight: '900', textAlign: 'center' },
   placedImage: { width: '100%', height: '100%' },
+  
+  // ✅ New Easy Slot Positions (Adjust percentages based on your PC case image)
+  mbSlotPos: { top: '25%', left: '6%', width: '45%', height: '45%' },
+  psuSlotPos: { top: '73%', left: '6%', width: '45%', height: '20%' },
+  ddSlotPos: { top: '8%', left: '6%', width: '45%', height: '15%' },
+  
+  // Medium Slot Positions
   easyCPUPos: { top: '23%', left: '62%', width: '27%', height: '27.5%' },
   easyRAMPos: { top: '10%', left: '9%', width: '19%', height: '45%' },
   easyPCIPos: { top: '59%', left: '38%', width: '55%', height: '16%' },
+  
+  // Hard Slot Positions
   cpuSlot: { top: '12%', left: '27%', width: '28%', height: '22%' },
   mem1Slot: { top: '6%', left: '65%', width: '4%', height: '45%' },
   mem2Slot: { top: '6%', left: '71%', width: '4%', height: '45%' },
@@ -473,7 +556,7 @@ const ls = StyleSheet.create({
   cardTopLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   badge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
   badgeText: { fontSize: 10, fontWeight: '800', letterSpacing: 1 },
-  stars: { fontSize: 14, letterSpacing: 2 , marginBottom: 6},
+  stars: { fontSize: 14, letterSpacing: 2, marginBottom: 6 },
   pairsPill: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
   pairsText: { fontSize: 11, fontWeight: '700' },
   cardTitle: { fontSize: 16, fontWeight: '700', color: theme.colors.text, marginBottom: 4 },
