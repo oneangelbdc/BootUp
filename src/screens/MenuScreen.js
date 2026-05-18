@@ -4,6 +4,7 @@ import {
   StyleSheet, ScrollView, Dimensions
 } from 'react-native';
 import { theme } from '../styles/theme';
+import AudioManager from '../utils/AudioManager';
 
 const { width } = Dimensions.get('window');
 
@@ -39,11 +40,17 @@ export default function MenuScreen({ navigation }) {
         <Text style={styles.heading}>Choose</Text>
         <Text style={styles.headingAccent}>Mission</Text>
         <Text style={styles.subheading}>3 mini-games to boot the system</Text>
+        
         {games.map((game) => (
           <TouchableOpacity
             key={game.id}
             style={styles.card}
-            onPress={() => navigation.navigate(game.screen, { gameId: game.id })}
+            onPress={() => {
+              AudioManager.playTap();
+              // Directly navigate to the game screen.
+              // Level selection is handled inside the game screen now.
+              navigation.navigate(game.screen, { gameId: game.id });
+            }}
             activeOpacity={0.85}
           >
             <Text style={styles.cardIcon}>{game.icon}</Text>

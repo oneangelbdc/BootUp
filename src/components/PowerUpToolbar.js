@@ -1,17 +1,27 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { theme } from '../styles/theme';
+import AudioManager from '../utils/AudioManager';
 
 export default function PowerUpToolbar({ onHint, onHelp, onInspect }) {
   return (
     <View style={styles.toolbar}>
-      <TouchableOpacity style={styles.btn} onPress={onHint}>
+      <TouchableOpacity
+        style={styles.btn}
+        onPress={() => { AudioManager.playTap(); onHint(); }}
+      >
         <Text style={styles.icon}>📋</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.btn} onPress={onHelp}>
+      <TouchableOpacity
+        style={styles.btn}
+        onPress={() => { AudioManager.playTap(); onHelp(); }}
+      >
         <Text style={styles.icon}>💡</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.btn} onPress={onInspect}>
+      <TouchableOpacity
+        style={styles.btn}
+        onPress={() => { AudioManager.playTap(); onInspect(); }}
+      >
         <Text style={styles.icon}>🔍</Text>
       </TouchableOpacity>
     </View>

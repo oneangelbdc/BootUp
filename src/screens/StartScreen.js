@@ -4,11 +4,12 @@ import {
   StyleSheet, Animated, Dimensions
 } from 'react-native';
 import { theme } from '../styles/theme';
+import AudioManager from '../utils/AudioManager';
 
 const { width, height } = Dimensions.get('window');
 
 export default function StartScreen({ navigation }) {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim  = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
@@ -40,7 +41,10 @@ export default function StartScreen({ navigation }) {
       <Animated.View style={{ opacity: fadeAnim }}>
         <TouchableOpacity
           style={styles.playButton}
-          onPress={() => navigation.navigate('Menu')}
+          onPress={() => {
+            AudioManager.playTap();
+            navigation.navigate('Menu');
+          }}
           activeOpacity={0.8}
         >
           <Text style={styles.playText}>PLAY</Text>
