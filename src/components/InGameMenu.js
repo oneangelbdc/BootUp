@@ -4,7 +4,7 @@ import Slider from '@react-native-community/slider';
 import { theme } from '../styles/theme';
 import AudioManager from '../utils/AudioManager';
 
-// ✅ Updated prop: Added onHome for strict Menu navigation
+// STATE & LIFECYCLE
 export default function InGameMenu({ visible, onClose, onRestart, onHome }) {
   const [sfxVolume, setSfxVolume] = useState(AudioManager.sfxVolume);
   const [musicVolume, setMusicVolume] = useState(AudioManager.bgmVolume);
@@ -16,6 +16,7 @@ export default function InGameMenu({ visible, onClose, onRestart, onHome }) {
     }
   }, [visible]);
 
+  // VOLUME HANDLERS
   const handleSfxVolumeChange = (value) => {
     setSfxVolume(value);
     AudioManager.setSfxVolume(value);
@@ -26,12 +27,13 @@ export default function InGameMenu({ visible, onClose, onRestart, onHome }) {
     AudioManager.setBgmVolume(value);
   };
 
+  // UI RENDER
   return (
     <Modal transparent visible={visible} animationType="none">
       <View style={styles.overlay}>
         <View style={styles.menuBox}>
           
-          {/* ✅ X Close Button - Upper Right Corner */}
+          {/* CLOSE BUTTON */}
           <TouchableOpacity 
             style={styles.closeIconButton} 
             onPress={() => { AudioManager.playTap(); onClose(); }}
@@ -40,7 +42,7 @@ export default function InGameMenu({ visible, onClose, onRestart, onHome }) {
             <Text style={styles.closeIconText}>✕</Text>
           </TouchableOpacity>
 
-          {/* ✅ SFX Slider with Icon on Left */}
+          {/* SFX SLIDER */}
           <View style={styles.sliderRow}>
             <Image 
               source={require('../assets/images/sfx-icon.png')} 
@@ -53,14 +55,14 @@ export default function InGameMenu({ visible, onClose, onRestart, onHome }) {
               maximumValue={1}
               step={0.01}
               value={sfxVolume}
-              minimumTrackTintColor={theme.colors.primary}
-              maximumTrackTintColor="#D1D5DB"
-              thumbTintColor={theme.colors.primary}
+              minimumTrackTintColor="#2B6CB0"
+              maximumTrackTintColor="#CBD5E0"
+              thumbTintColor="#2B6CB0"
               onValueChange={handleSfxVolumeChange}
             />
           </View>
 
-          {/* ✅ BGM Slider with Icon on Left */}
+          {/* BGM SLIDER */}
           <View style={[styles.sliderRow, { marginTop: 8 }]}>
             <Image 
               source={require('../assets/images/bgm-icon.png')} 
@@ -73,28 +75,30 @@ export default function InGameMenu({ visible, onClose, onRestart, onHome }) {
               maximumValue={1}
               step={0.01}
               value={musicVolume}
-              minimumTrackTintColor={theme.colors.primary}
-              maximumTrackTintColor="#D1D5DB"
-              thumbTintColor={theme.colors.primary}
+              minimumTrackTintColor="#2B6CB0"
+              maximumTrackTintColor="#CBD5E0"
+              thumbTintColor="#2B6CB0"
               onValueChange={handleMusicVolumeChange}
             />
           </View>
 
-          {/* ✅ Restart Button */}
+          {/* 3D RESTART BUTTON */}
           <TouchableOpacity
-            style={styles.btn}
+            style={styles.btn3D}
             onPress={() => { AudioManager.playTap(); onRestart(); }}
+            activeOpacity={0.85}
           >
             <Text style={styles.btnText}>↺  Restart</Text>
           </TouchableOpacity>
 
-          {/* ✅ Home Button - Navigates strictly to MenuScreen */}
+          {/* 3D HOME BUTTON */}
           <TouchableOpacity
-            style={styles.homeBtn}
+            style={styles.homeBtn3D}
             onPress={() => { 
               AudioManager.playTap(); 
-              if (onHome) onHome(); // ✅ Strict Menu navigation
+              if (onHome) onHome();
             }}
+            activeOpacity={0.85}
           >
             <Image 
               source={require('../assets/images/home-icon.png')} 
@@ -109,6 +113,7 @@ export default function InGameMenu({ visible, onClose, onRestart, onHome }) {
   );
 }
 
+// STYLESHEET
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
   menuBox: { 
@@ -121,82 +126,39 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   
-  /* ✅ X Close Button Styles */
   closeIconButton: {
-    position: 'absolute',
-    top: 8,
-    right: 9,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F7FAFC',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
+    position: 'absolute', top: 8, right: 9, width: 32, height: 32, borderRadius: 16,
+    backgroundColor: '#F7FAFC', justifyContent: 'center', alignItems: 'center', zIndex: 10,
   },
-  closeIconText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: theme.colors.text,
-    lineHeight: 20,
-  },
+  closeIconText: { fontSize: 20, fontWeight: '700', color: theme.colors.text, lineHeight: 20 },
   
-  /* ✅ Slider row: icon on left, slider fills remaining space */
-  sliderRow: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    marginBottom: 8, 
-    width: '100%',
-  },
+  sliderRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, width: '100%' },
+  iconImage: { marginLeft: -10, width: 50, height: 50 },
+  slider: { flex: 1, height: 50, marginTop: 15, marginBottom: 15 },
   
-  /* ✅ Icon image style */
-  iconImage: { 
-    marginLeft: -10,
-    width: 50, 
-    height: 50,
+  // 3D Restart Button
+  btn3D: { 
+    backgroundColor: '#9cd5ff', 
+    borderBottomWidth: 5, borderBottomColor: '#0f2c67',
+    borderLeftWidth: 0.5, borderLeftColor: '#0f2c67',
+    borderRightWidth: 0.5, borderRightColor: '#0f2c67',
+    borderTopWidth: 0, borderRadius: 8,
+    paddingVertical: 12, paddingHorizontal: 40, 
+    marginBottom: 10, width: '70%', alignItems: 'center' 
   },
+  btnText: { color: '#0f2c67', fontWeight: '500', fontSize: 18.5, marginLeft: -8 },
   
-  /* ✅ Slider takes remaining space in row */
-  slider: { 
-    flex: 1, 
-    height: 40, 
-    marginTop: 15,
-    marginBottom: 15 
+  // 3D Home Button
+  homeBtn3D: { 
+    flexDirection: 'row', alignItems: 'center', marginTop: 8,
+    backgroundColor: '#48a0ff', 
+    borderBottomWidth: 5, borderBottomColor: '#0f2c67',
+    borderLeftWidth: 0.5, borderLeftColor: '#0f2c67',
+    borderRightWidth: 0.5, borderRightColor: '#0f2c67',
+    borderTopWidth: 0, borderRadius: 8,
+    paddingVertical: 12, paddingHorizontal: 40, 
+    width: '70%', alignItems: 'center', justifyContent: 'center',
   },
-  
-  /* ✅ Restart Button - Primary Blue */
-  btn: { 
-    backgroundColor: theme.colors.primary, 
-    paddingVertical: 12, 
-    paddingHorizontal: 40, 
-    borderRadius: theme.radius.sm, 
-    marginBottom: 10, 
-    width: '80%', 
-    alignItems: 'center' 
-  },
-  btnText: { color: theme.colors.black, fontWeight: '500', fontSize: 18 },
-  
-  /* ✅ Home Button - Darker Blue, No Tint on Icon */
-  homeBtn: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    marginTop: 8,
-    backgroundColor: '#2B6CB0',
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderRadius: theme.radius.sm,
-    width: '80%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  homeIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 8,
-  },
-  homeText: { 
-    color: theme.colors.black,
-    fontSize: 18,
-    fontWeight: '500',
-  },
+  homeIcon: { width: 20, height: 20, marginRight: 8, marginLeft: -8 },
+  homeText: { color: '#0f2c67', fontSize: 18.5, fontWeight: '500' }
 });
