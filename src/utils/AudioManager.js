@@ -8,7 +8,6 @@ const AudioManager = {
   currentBGM: null,
   isInitialized: false,
 
-  // ✅ Call this ONCE when the app starts
   async init() {
     if (this.isInitialized) return;
     try {
@@ -16,10 +15,7 @@ const AudioManager = {
         playsInSilentModeIOS: true,
         allowsRecordingIOS: false,
         staysActiveInBackground: false,
-        shouldDuckAndroid: true, // 👈 Critical: pauses your audio when system sounds play
-        // ✅ Use numeric values for broader compatibility
-        interruptionModeIOS: 2, // 2 = DuckOthers (same as INTERRUPTION_MODE_IOS_DUCK_OTHERS)
-        interruptionModeAndroid: 2, // 2 = DuckOthers
+        shouldDuckAndroid: true,
       });
       this.isInitialized = true;
     } catch (e) {
