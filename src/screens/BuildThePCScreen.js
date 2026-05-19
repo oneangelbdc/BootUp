@@ -122,7 +122,7 @@ const LEVELS = {
     badgeBg: '#FDE8C8',
     accentColor: '#E89020',
     parts: MEDIUM_PARTS,
-    hints: ['Start with the CPU!', 'RAM goes next to it.', 'PCI handles visuals.'],
+    hints: ['HINT MODE - Tap a part to highlight its slot'],
   },
   hard: {
     key: 'hard',
@@ -134,7 +134,7 @@ const LEVELS = {
     badgeBg: '#FADFDF',
     accentColor: '#D94444',
     parts: HARD_PARTS,
-    hints: ['I/O goes on the left.', 'CPU is in the center.', 'Match the slot types carefully.'],
+    hints: ['HINT MODE - Tap a part to highlight its slot'],
   },
 };
 
