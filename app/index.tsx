@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react'; // ✅ Added useState
 import { NavigationIndependentTree } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import * as SplashScreen from 'expo-splash-screen'; // ✅ Import SplashScreen
 import { TouchableOpacity, Text } from 'react-native';
 import { theme } from '../src/styles/theme';
 import AudioManager from '../src/utils/AudioManager';
@@ -13,13 +14,52 @@ import CompletionScreen from '../src/screens/CompletionScreen';
 
 const Stack = createStackNavigator();
 
+// ✅ Prevent the splash screen from auto-hiding immediately
+SplashScreen.preventAutoHideAsync();
+
 export default function App() {
+  const [appIsReady, setAppIsReady] = useState(false);
+
   useEffect(() => {
-    AudioManager.playBGM(require('../src/assets/sounds/bg_music.mp3'));
-    return () => {
-      AudioManager.stopBGM();
-    };
+    async function prepare() {
+      try {
+        // ✅ PRELOAD CRITICAL ASSETS HERE
+        // 1. Fonts (if any custom fonts are used)
+        // await Font.loadAsync({ ... });
+        
+        // 2. Critical Sounds (if AudioManager has a preload method)
+        // await AudioManager.preloadCriticalSounds?.();
+
+        // ✅ Optional: Keep splash screen visible for a brief moment for branding
+        // await new Promise(resolve => setTimeout(resolve, 500));
+
+      } catch (e) {
+        console.warn('Asset preload error:', e);
+      } finally {
+        // ✅ Tell the app to render
+        setAppIsReady(true);
+        // ✅ Hide splash screen once ready
+        await SplashScreen.hideAsync();
+      }
+    }
+
+    prepare();
   }, []);
+
+  // ✅ BGM Effect - Only play when app is ready
+  useEffect(() => {
+    if (appIsReady) {
+      AudioManager.playBGM(require('../src/assets/sounds/bg_music.mp3'));
+      return () => {
+        AudioManager.stopBGM();
+      };
+    }
+  }, [appIsReady]);
+
+  // ✅ While loading, show nothing (SplashScreen covers the app)
+  if (!appIsReady) {
+    return null;
+  }
 
   return (
     <NavigationIndependentTree>

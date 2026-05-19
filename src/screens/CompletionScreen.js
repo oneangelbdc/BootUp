@@ -4,6 +4,7 @@ import {
   StyleSheet, ScrollView, Animated, Dimensions
 } from 'react-native';
 import { theme } from '../styles/theme';
+import AudioManager from '../utils/AudioManager'; // ✅ Import AudioManager
 
 const { width } = Dimensions.get('window');
 
@@ -19,7 +20,7 @@ const LESSONS = {
       fact: 'Good UI design ensures every element has proper spacing and hierarchy.' },
   ],
   
-  // ✅ NEW: BuildThePC level-specific lessons
+  // ✅ BuildThePC level-specific lessons
   BuildThePC_easy: [
     { icon: '🔧', title: 'Motherboard',
       fact: 'The motherboard is the main circuit board that connects all PC components together.' },
@@ -107,6 +108,21 @@ const LESSONS = {
   ],
 };
 
+// ✅ Helper to get next level key
+const getNextLevel = (currentLevel) => {
+  if (currentLevel === 'easy') return 'medium';
+  if (currentLevel === 'medium') return 'hard';
+  return null; // Already on hard
+};
+
+// ✅ Helper to get level number
+const getLevelNumber = (levelKey) => {
+  if (levelKey === 'easy') return 1;
+  if (levelKey === 'medium') return 2;
+  if (levelKey === 'hard') return 3;
+  return 1; // fallback
+};
+
 export default function CompletionScreen({ navigation, route }) {
   const gameId   = route?.params?.gameId   || '';
   const levelKey = route?.params?.levelKey || '';
@@ -116,12 +132,10 @@ export default function CompletionScreen({ navigation, route }) {
   if (gameId === 'CircuitConnect') {
     lessons = LESSONS[`CircuitConnect_${levelKey}`] || LESSONS['CircuitConnect_easy'];
   } else if (gameId === 'BuildThePC') {
-    // ✅ NEW: BuildThePC now uses level-specific lessons
     lessons = LESSONS[`BuildThePC_${levelKey}`] || LESSONS['BuildThePC_medium'];
   } else if (gameId === 'DebugInterface') {
     lessons = LESSONS['DebugInterface'];
   } else {
-    // safe fallback
     lessons = LESSONS['DebugInterface'];
   }
  
@@ -148,6 +162,64 @@ export default function CompletionScreen({ navigation, route }) {
     ]).start();
   }, []);
 
+  // ✅ Play completion sound when screen opens
+  useEffect(() => {
+    AudioManager.playComplete();
+  }, []);
+
+  // ✅ Button Handlers
+  const handleNextLevel = () => {
+    // ✅ SPECIAL CASE: BuildThePC hard → CircuitConnect LEVEL SELECT
+    if (gameId === 'BuildThePC' && levelKey === 'hard') {
+      navigation.navigate('CircuitConnect');
+      return;
+    }
+    
+    const nextLevel = getNextLevel(levelKey);
+    if (nextLevel) {
+      if (gameId === 'BuildThePC') {
+        navigation.navigate('BuildThePC', { 
+          screen: 'PCGame', 
+          params: { levelKey: nextLevel } 
+        });
+      } else if (gameId === 'CircuitConnect') {
+        navigation.navigate('CircuitConnect', { 
+          screen: 'CircuitGame', 
+          params: { levelKey: nextLevel } 
+        });
+      } else if (gameId === 'DebugInterface') {
+        navigation.navigate('Menu');
+      }
+    } else {
+      navigation.navigate('Menu');
+    }
+  };
+
+  const handlePlayAgain = () => {
+    if (gameId === 'BuildThePC') {
+      navigation.navigate('BuildThePC', { 
+        screen: 'PCGame', 
+        params: { levelKey, reset: true } 
+      });
+    } else if (gameId === 'CircuitConnect') {
+      navigation.navigate('CircuitConnect', { 
+        screen: 'CircuitGame', 
+        params: { levelKey, reset: true } 
+      });
+    } else if (gameId === 'DebugInterface') {
+      navigation.navigate('DebugInterface', { reset: true });
+    }
+  };
+
+  const handleHome = () => {
+    navigation.navigate('Menu');
+  };
+
+  // ✅ Determine button text and level display
+  const isBuildThePCHard = gameId === 'BuildThePC' && levelKey === 'hard';
+  const nextButtonText = isBuildThePCHard ? 'Next Mission →' : (getNextLevel(levelKey) ? 'Next Level →' : 'Back to Menu 🏠');
+  const levelNumber = getLevelNumber(levelKey); // ✅ Dynamic level number
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scroll}>
       <View style={styles.decorCircle} />
@@ -157,7 +229,8 @@ export default function CompletionScreen({ navigation, route }) {
       <Animated.View style={{ opacity: fadeAnim }}>
         <Text style={styles.title}>SYSTEM</Text>
         <Text style={styles.title}>RESTORED!</Text>
-        <Text style={styles.subtitle}>Level 1 — Complete ✅</Text>
+        {/* ✅ DYNAMIC LEVEL NUMBER */}
+        <Text style={styles.subtitle}>Level {levelNumber} — Complete ✅</Text>
       </Animated.View>
 
       <Animated.View style={[styles.dykSection, { opacity: fadeAnim }]}>
@@ -182,16 +255,18 @@ export default function CompletionScreen({ navigation, route }) {
       </Animated.View>
 
       <Animated.View style={[styles.buttons, { opacity: fadeAnim }]}>
-        <TouchableOpacity style={styles.primaryBtn}
-          onPress={() => navigation.navigate('Menu')}>
-          <Text style={styles.primaryBtnText}>Next Level →</Text>
+        {/* ✅ Next Level / Next Mission Button */}
+        <TouchableOpacity style={styles.primaryBtn} onPress={handleNextLevel}>
+          <Text style={styles.primaryBtnText}>{nextButtonText}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.secondaryBtn}
-          onPress={() => navigation.goBack()}>
+        
+        {/* ✅ Play Again Button */}
+        <TouchableOpacity style={styles.secondaryBtn} onPress={handlePlayAgain}>
           <Text style={styles.secondaryBtnText}>↺  Play Again</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.homeBtn}
-          onPress={() => navigation.navigate('Menu')}>
+        
+        {/* ✅ Home Button */}
+        <TouchableOpacity style={styles.homeBtn} onPress={handleHome}>
           <Text style={styles.primaryBtnText}>🏠  Home</Text>
         </TouchableOpacity>
       </Animated.View>

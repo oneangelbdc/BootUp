@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Dimensions,
   Alert, ScrollView, Image, Modal, SafeAreaView, Platform, ImageBackground, Animated, BackHandler
@@ -116,7 +116,7 @@ const LEVELS = {
     key: 'medium',
     badge: 'MEDIUM',
     title: 'Basic Setup',
-    desc: 'Build a simple PC with essential components. Perfect for beginners!',
+    desc: 'Build a simple PC with essential components.',
     stars: 2,
     badgeColor: '#7A4508',
     badgeBg: '#FDE8C8',
@@ -209,7 +209,7 @@ function LevelCard({ level, onPress }) {
 function GameScreen({ navigation, route }) {
   const { levelKey } = route.params;
   const level = LEVELS[levelKey];
-  const currentPartsList = level.parts;
+  const originalPartsList = level.parts; // Keep original for validation
 
   const isNewEasy = levelKey === 'easy';
   const isMedium = levelKey === 'medium';
@@ -223,6 +223,22 @@ function GameScreen({ navigation, route }) {
   const [isInspectMode, setIsInspectMode] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [shuffleKey, setShuffleKey] = useState(0); // ✅ For re-shuffling on reset
+
+  // ✅ Fisher-Yates shuffle helper
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // ✅ Memoized shuffled inventory - re-shuffles when levelKey or shuffleKey changes
+  const shuffledPartsList = useMemo(() => {
+    return shuffleArray(originalPartsList);
+  }, [originalPartsList, shuffleKey]);
 
   // ✅ RESET LISTENER
   useEffect(() => {
@@ -232,13 +248,18 @@ function GameScreen({ navigation, route }) {
   }, [route.params?.reset]);
 
   useEffect(() => {
-    if (placedPartIds.length === currentPartsList.length && currentPartsList.length > 0) {
+    if (placedPartIds.length === originalPartsList.length && originalPartsList.length > 0) {
       setTimeout(() => { navigation.navigate('Completion', { gameId: 'BuildThePC', levelKey }); }, 600);
     }
-  }, [placedPartIds]);
+  }, [placedPartIds, originalPartsList.length]);
 
   const handleReset = () => {
-    setPlacedParts({}); setPlacedPartIds([]); setSelectedPart(null); setShowHint(false); setMenuVisible(false);
+    setPlacedParts({}); 
+    setPlacedPartIds([]); 
+    setSelectedPart(null); 
+    setShowHint(false); 
+    setMenuVisible(false);
+    setShuffleKey(prev => prev + 1); // ✅ Trigger re-shuffle on reset
   };
 
   const handlePartSelect = (part) => {
@@ -316,8 +337,9 @@ function GameScreen({ navigation, route }) {
       <View style={styles.decorCircle} />
       
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>← Back to level selection</Text>
+        {/* ✅ FIXED: Navigate to PCLevels (level select) instead of using goBack() */}
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('PCLevels')}>
+          <Text style={styles.backText}>← Level Select</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuBtn} onPress={() => setMenuVisible(true)}>
           <Text style={styles.menuText}>Menu</Text>
@@ -328,13 +350,13 @@ function GameScreen({ navigation, route }) {
       <View style={styles.statusBar}>
         <View style={styles.statusLeft}>
           <View style={[styles.statusDot, {
-            backgroundColor: placedPartIds.length === currentPartsList.length ? '#1D9E75' : level.accentColor,
+            backgroundColor: placedPartIds.length === originalPartsList.length ? '#1D9E75' : level.accentColor,
           }]} />
           <Text style={styles.statusText}>BUILD THE PC</Text>
         </View>
         <View style={[styles.levelPill, { backgroundColor: level.badgeBg }]}>
           <Text style={[styles.levelPillText, { color: level.badgeColor }]}>
-            {level.badge}  {placedPartIds.length}/{currentPartsList.length}
+            {level.badge}  {placedPartIds.length}/{originalPartsList.length}
           </Text>
         </View>
       </View>
@@ -389,7 +411,8 @@ function GameScreen({ navigation, route }) {
         <View style={styles.inventoryContainer}>
           <Text style={styles.inventoryLabel}>INVENTORY</Text>
           <View style={styles.inventory}>
-            {currentPartsList.map(part => (
+            {/* ✅ Use shuffledPartsList for randomized inventory order */}
+            {shuffledPartsList.map(part => (
               <TouchableOpacity
                 key={part.id}
                 style={[styles.partCard, placedPartIds.includes(part.id) && styles.partPlaced, selectedPart?.id === part.id && styles.partSelected]}
@@ -452,7 +475,7 @@ function GameScreen({ navigation, route }) {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Part Specifications</Text>
             <ScrollView style={{ marginBottom: 20 }}>
-              {currentPartsList.map(p => (
+              {originalPartsList.map(p => (
                 <View key={p.id} style={styles.specItem}>
                   <Text style={styles.specLabel}>{p.label}</Text>
                   <Text style={styles.specDesc}>{p.desc}</Text>
@@ -550,7 +573,7 @@ const styles = StyleSheet.create({
   
   // ✅ UPDATED FOOTER TOOLBAR STYLES
   footerToolbar: {
-    position: 'absolute', bottom: Platform.OS === 'ios' ? 40 : 30, left: 20, right: 20,
+    position: 'absolute', bottom: Platform.OS === 'ios' ? 47 : 47, left: 20, right: 20,
     height: 85, backgroundColor: '#4299E1', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center',
     borderRadius: 25, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 4.65,
     paddingHorizontal: 10,
@@ -646,7 +669,8 @@ export default function BuildThePCScreen({ navigation }) {
             {...props}
             navigation={{
               ...props.navigation,
-              goBack: () => props.navigation.goBack(),
+              // ✅ FIXED: Use navigate('PCLevels') instead of goBack() for level select
+              goBack: () => props.navigation.navigate('PCLevels'),
               navigate: (screen, params) =>
                 screen === 'Menu' || screen === 'Completion'
                   ? navigation.navigate(screen, params)

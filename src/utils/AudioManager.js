@@ -1,3 +1,4 @@
+// src/utils/AudioManager.js
 import { Audio } from 'expo-av';
 
 const AudioManager = {
@@ -5,20 +6,44 @@ const AudioManager = {
   bgmVolume: 0.35,
   bgmSound: null,
   currentBGM: null,
+  isInitialized: false,
 
-  async playSFX(source) {
+  // ✅ Call this ONCE when the app starts
+  async init() {
+    if (this.isInitialized) return;
     try {
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
         allowsRecordingIOS: false,
         staysActiveInBackground: false,
+        shouldDuckAndroid: true, // 👈 Critical: pauses your audio when system sounds play
+        // ✅ Use numeric values for broader compatibility
+        interruptionModeIOS: 2, // 2 = DuckOthers (same as INTERRUPTION_MODE_IOS_DUCK_OTHERS)
+        interruptionModeAndroid: 2, // 2 = DuckOthers
       });
+      this.isInitialized = true;
+    } catch (e) {
+      console.warn('Audio init error:', e);
+      // Fallback: try with minimal config
+      try {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          shouldDuckAndroid: true,
+        });
+        this.isInitialized = true;
+      } catch (e2) {
+        console.warn('Audio fallback init failed:', e2);
+      }
+    }
+  },
 
+  async playSFX(source) {
+    if (!this.isInitialized) await this.init();
+    try {
       const { sound } = await Audio.Sound.createAsync(
         source,
         { volume: this.sfxVolume, shouldPlay: true }
       );
-
       sound.setOnPlaybackStatusUpdate(async (status) => {
         if (status.didJustFinish) {
           try { await sound.unloadAsync(); } catch (_) {}
@@ -30,6 +55,7 @@ const AudioManager = {
   },
 
   async playBGM(source, options = {}) {
+    if (!this.isInitialized) await this.init();
     try {
       if (this.currentBGM === source && this.bgmSound) {
         const status = await this.bgmSound.getStatusAsync();
@@ -38,22 +64,13 @@ const AudioManager = {
         }
         return;
       }
-
       if (this.bgmSound) {
         await this.stopBGM();
       }
-
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        allowsRecordingIOS: false,
-        staysActiveInBackground: false,
-      });
-
       const { sound } = await Audio.Sound.createAsync(
         source,
         { isLooping: true, shouldPlay: true, volume: this.bgmVolume, ...options }
       );
-
       this.bgmSound = sound;
       this.currentBGM = source;
     } catch (e) {
