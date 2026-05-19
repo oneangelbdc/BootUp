@@ -110,7 +110,7 @@ const LEVELS = {
       { id: 'PSU_E', label: 'Power Supply', type: 'PSU', imgKey: 'pcPsuInv', placedImgKey: 'pcPsuPlaced', desc: 'Provides power to all components.' },
       { id: 'DD_E', label: 'Disk Drive', type: 'DD', imgKey: 'pcDdInv', placedImgKey: 'pcDdPlaced', desc: 'Storage drive bay.' },
     ],
-    hints: ['Start with the Motherboard!', 'Slot in the Power Supply.', 'Slide the Disk Drive into the bay.'],
+    hints: ['HINT MODE - Tap a part to highlight its slot'],
   },
   medium: {
     key: 'medium',
@@ -340,10 +340,15 @@ function GameScreen({ navigation, route }) {
       <View style={styles.decorCircle} />
       
       <View style={styles.header}>
-        {/* ✅ FIXED: CircuitConnect-style back button */}
+        {/* ✅ Back button */}
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('PCLevels')}>
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
+        
+        {/* ✅ UNIFORM TITLE - Same across all levels */}
+        <Text style={styles.gameTitle}>Build The PC</Text>
+        
+        {/* ✅ Menu button */}
         <TouchableOpacity style={styles.menuBtn} onPress={() => setMenuVisible(true)}>
           <Text style={styles.menuText}>Menu</Text>
         </TouchableOpacity>
@@ -363,6 +368,20 @@ function GameScreen({ navigation, route }) {
           </Text>
         </View>
       </View>
+
+      {/* ✅ INSPECT MODE BANNER - Added per request */}
+      {isInspectMode && (
+        <View style={styles.inspectModeBanner}>
+          <Text style={styles.inspectModeBannerText}>🔍  INSPECT MODE  —  Tap a slot to learn needed part</Text>
+        </View>
+      )}
+
+      {/* ✅ HINT BANNER - Added per request */}
+      {showHint && (
+        <View style={styles.hintWrapper}>
+          <Text style={styles.hintText}>💡 {level.hints[0]}</Text>
+        </View>
+      )}
 
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* ✅ Only show "Go To Inventory" button for Hard level */}
@@ -455,8 +474,15 @@ function GameScreen({ navigation, route }) {
           <Text style={styles.toolBtnLabel}>Specs</Text>
         </TouchableOpacity>
         
-        {/* Hint Button - Yellow when active */}
-        <TouchableOpacity onPress={() => setShowHint(!showHint)} style={styles.toolBtn}>
+        {/* Hint Button - Yellow when active, disables Inspect when activated */}
+        <TouchableOpacity 
+          onPress={() => {
+            // ✅ MUTUAL EXCLUSIVITY: Disable Inspect when Hint is toggled ON
+            if (!showHint && isInspectMode) setIsInspectMode(false);
+            setShowHint(!showHint);
+          }} 
+          style={styles.toolBtn}
+        >
           <View style={[styles.toolBtnCircle, showHint && styles.toolBtnCircleActive]}>
             <Image 
               source={TOOLBAR_ICONS.hint} 
@@ -466,8 +492,15 @@ function GameScreen({ navigation, route }) {
           <Text style={styles.toolBtnLabel}>Hint</Text>
         </TouchableOpacity>
         
-        {/* Inspect Button - Yellow when active */}
-        <TouchableOpacity onPress={() => setIsInspectMode(!isInspectMode)} style={styles.toolBtn}>
+        {/* Inspect Button - Yellow when active, disables Hint when activated */}
+        <TouchableOpacity 
+          onPress={() => {
+            // ✅ MUTUAL EXCLUSIVITY: Disable Hint when Inspect is toggled ON
+            if (!isInspectMode && showHint) setShowHint(false);
+            setIsInspectMode(!isInspectMode);
+          }} 
+          style={styles.toolBtn}
+        >
           <View style={[styles.toolBtnCircle, isInspectMode && styles.toolBtnCircleActive]}>
             <Image 
               source={TOOLBAR_ICONS.inspect} 
@@ -516,7 +549,7 @@ const styles = StyleSheet.create({
     width: 160, height: 160, borderRadius: 80,
     backgroundColor: theme.colors.primary, opacity: 0.12,
   },
-  // ✅ UPDATED: CircuitConnect-style header (removed marginTop: 75)
+  // ✅ UPDATED: Header with centered title
   header: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
@@ -524,31 +557,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, 
     marginBottom: 10 
   },
-// ✅ FIXED backBtn style
-backBtn: { 
-  marginTop: 80,
-  backgroundColor: theme.colors.white,   
-  borderWidth: 1, 
-  borderRadius: 3,
-  height: 40,
-  width: 70,
-},
-
-// ✅ FIXED backText style
-backText: { 
-  fontWeight: '700', 
-  fontSize: 40,
-  color: theme.colors.text, 
-  marginLeft: 14,
-  marginTop: -15
-},
-  menuBtn: { 
+  // ✅ FIXED backBtn style
+  backBtn: { 
     marginTop: 80,
+    backgroundColor: theme.colors.white,   
+    borderWidth: 1, 
+    borderRadius: 3,
+    height: 40,
+    width: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // ✅ FIXED backText style
+  backText: { 
+    fontWeight: '700',
+    marginTop: -15,
+    fontSize: 40,
+    color: theme.colors.text, 
+  },
+  // ✅ NEW: Uniform game title style (matches DebugInterfaceScreen)
+  gameTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.colors.text,
+    marginTop: 80,
+    marginRight: 75, // Balance spacing with back button
+  },
+  menuBtn: { 
     backgroundColor: '#A6D5FA', 
     borderWidth: 1.5, 
     borderRadius: 8, 
     paddingVertical: 8, 
-    paddingHorizontal: 15 
+    paddingHorizontal: 15, 
+    marginTop: 80
   },
   menuText: { 
     fontWeight: '700', 
@@ -567,6 +610,44 @@ backText: {
   statusText: { fontSize: 9, fontWeight: '700', letterSpacing: 1, color: theme.colors.text },
   levelPill: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
   levelPillText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
+
+  /* ── Inspect Mode Banner - ADDED PER REQUEST ── */
+  inspectModeBanner: {
+    marginHorizontal:  20,
+    marginBottom:      6,
+    backgroundColor:   'white',
+    borderRadius:      12,
+    paddingVertical:   6,
+    paddingHorizontal: 14,
+    borderWidth:       1.5,
+    borderColor:       '#4A90E2',
+    alignItems:        'center',
+    zIndex:            90,
+  },
+  inspectModeBannerText: {
+    fontSize:    11,
+    fontWeight:  '700',
+    color:       '#2B6CB0',
+    letterSpacing: 0.4,
+  },
+
+  /* ── Hint Banner - ADDED PER REQUEST ── */
+  hintWrapper: {
+    marginHorizontal:  20,
+    marginBottom:      6,
+    backgroundColor:   'white',
+    borderRadius:      12,
+    paddingVertical:   6,
+    paddingHorizontal: 14,
+    borderWidth:       1.5,
+    borderColor:       '#F6E05E',
+    alignItems:        'center',
+    zIndex:            90,
+  },
+  hintText: { color: '#B7791F',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.4,},
 
   scrollContent: { paddingVertical: 20, alignItems: 'center' },
   boardWrapper: { flexDirection: 'row', alignItems: 'flex-start', width: BOARD_W + IO_W * 0.25 },
@@ -708,16 +789,17 @@ const ls = StyleSheet.create({
   },
   backText: { 
     fontSize: 18, 
+    fontWeight: 900,
     color: theme.colors.text 
   },
   headerTitle: { 
     marginTop: 50, // ✅ Changed from 80 to 50 to match CircuitConnect
-    fontSize: 18, 
+    fontSize: 25, 
     fontWeight: '700', 
     color: theme.colors.text 
   },
   headerSub: { 
-    fontSize: 12, 
+    fontSize: 17, 
     color: theme.colors.textLight, 
     marginTop: 1 
   },
