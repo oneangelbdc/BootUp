@@ -230,7 +230,7 @@ function DraggableIcon({ item, placeholders, containerViewRef, containerLayout, 
 
       // On release: snap icon back and check if it landed on a valid zone
       onPanResponderRelease: (_, gesture) => {
-        Animated.spring(scale, { toValue: 1,               useNativeDriver: false }).start();
+        Animated.spring(scale, { toValue: 1,                useNativeDriver: false }).start();
         Animated.spring(pan,   { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
 
         const { px, py, width, height } = containerLayout.current;
@@ -311,12 +311,12 @@ function PlaceholderZone({ ph, placedItem, containerW, containerH, inspectMode, 
       style={[
         styles.placeholder,
         {
-          left:            cx - W / 2,
-          top:             cy - H / 2,
-          width:           W,
-          height:          H,
-          borderColor:     hasItem ? (isCorrect ? '#48C78E' : '#E53E3E') : '#00000042',
-          borderStyle:     hasItem ? 'solid' : 'dashed',
+          left:             cx - W / 2,
+          top:              cy - H / 2,
+          width:            W,
+          height:           H,
+          borderColor:      hasItem ? (isCorrect ? '#48C78E' : '#E53E3E') : '#00000042',
+          borderStyle:      hasItem ? 'solid' : 'dashed',
           backgroundColor: hasItem
             ? (isCorrect ? 'rgba(72,199,142,0.25)' : 'rgba(229,62,62,0.25)')
             : 'rgba(255,255,255,0.55)',
@@ -382,22 +382,22 @@ function PlaceholderZone({ ph, placedItem, containerW, containerH, inspectMode, 
 
    KEY STATE
    ─────────────────────────────────────────────────────────
-   placedMap     — { [zoneId]: { src, correct, itemId, description } }
-                   Tracks what has been dropped into each zone.
+   placedMap      — { [zoneId]: { src, correct, itemId, description } }
+                    Tracks what has been dropped into each zone.
 
-   bugStates     — Array of bug objects with an `isFixed` flag.
-                   Only used in Level 3 (type: 'spot').
+   bugStates      — Array of bug objects with an `isFixed` flag.
+                    Only used in Level 3 (type: 'spot').
 
-   inspectMode   — Boolean toggle. When true, tapping elements
-                   shows descriptions instead of triggering gameplay.
+   inspectMode    — Boolean toggle. When true, tapping elements
+                    shows descriptions instead of triggering gameplay.
 
    inspectTooltip— The string currently shown in the tooltip card.
-                   Empty string = tooltip hidden.
+                    Empty string = tooltip hidden.
 
    NAVIGATION TRIGGERS (inside this screen)
    ─────────────────────────────────────────────────────────
-   ← Back button       → navigation.navigate('Menu')
-   Menu overlay > Home → navigation.navigate('Menu')
+   ← Back button        → navigation.navigate('Menu')
+   Menu overlay > Home  → navigation.navigate('Menu')
    Level complete > Next → navigation.replace('DebugGame', { levelIndex: next })
    Level 3 complete > Finish → navigation.navigate('Completion', { gameId })
 ============================================================= */
@@ -512,9 +512,9 @@ function DebugGameScreen({ navigation, route }) {
      Tapping a bug zone either:
        • INSPECT MODE ON  → shows the bug's description
        • INSPECT MODE OFF → marks the bug as fixed,
-                            plays audio, triggers feedback flash,
-                            and checks if all bugs are fixed
-                            (→ shows completion popup after 600ms)
+                             plays audio, triggers feedback flash,
+                             and checks if all bugs are fixed
+                             (→ shows completion popup after 600ms)
   ────────────────────────────────────────────────────── */
   const handleSpotTap = (id) => {
     if (inspectMode) {
@@ -923,10 +923,10 @@ const styles = StyleSheet.create({
 
   // ── Header ──
   header:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 20, marginBottom: 12, zIndex: 1 },
-  iconBtn:   { width: 50, height: 40, backgroundColor: '#FFF', borderWidth: 1.5, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
+  iconBtn:   { marginTop: 80, width: 50, height: 40, backgroundColor: '#FFF', borderWidth: 1.5, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
   iconText:  { fontSize: 20, fontWeight: '600' },
-  titleText: { flex: 1, paddingLeft: 15, fontSize: 16, fontWeight: 'bold', letterSpacing: 1 },
-  menuBtn:   { backgroundColor: '#A6D5FA', borderWidth: 1.5, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 15 },
+  titleText: { marginTop: 80, flex: 1, paddingLeft: 15, fontSize: 16, fontWeight: 'bold', letterSpacing: 1 },
+  menuBtn:   { marginTop: 80, backgroundColor: '#A6D5FA', borderWidth: 1.5, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 15 },
   menuText:  { fontSize: 14, fontWeight: '500' },
 
   // ── Progress Banner ──
