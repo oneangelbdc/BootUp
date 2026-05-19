@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react'; // ✅ Added useState
+import React, { useEffect, useState } from 'react';
 import { NavigationIndependentTree } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import * as SplashScreen from 'expo-splash-screen'; // ✅ Import SplashScreen
-import { TouchableOpacity, Text } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
 import { theme } from '../src/styles/theme';
 import AudioManager from '../src/utils/AudioManager';
 import StartScreen from '../src/screens/StartScreen';
@@ -65,96 +64,21 @@ export default function App() {
     <NavigationIndependentTree>
       <Stack.Navigator 
         initialRouteName="Start"
-        screenOptions={{
-          headerStyle: { backgroundColor: theme.colors.background },
-          headerTitleStyle: { color: theme.colors.text, fontWeight: '700' },
-        }}
+        screenOptions={{ headerShown: false }} // ✅ DISABLE ALL HEADERS GLOBALLY
       >
         {/* StartScreen: No header */}
-        <Stack.Screen
-          name="Start"
-          component={StartScreen}
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="Start" component={StartScreen} />
         
-        {/* MenuScreen: Back button goes to Start */}
-        <Stack.Screen
-          name="Menu"
-          component={MenuScreen}
-          options={({ navigation }) => ({
-            headerShown: true,
-            headerTitle: 'Menu',
-            headerLeft: () => (
-              <TouchableOpacity 
-                onPress={() => navigation.navigate('Start')}
-                style={{ marginLeft: 16, padding: 8 }}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.text }}>←</Text>
-              </TouchableOpacity>
-            ),
-          })}
-        />
+        {/* MenuScreen: No header (custom back button handled in screen) */}
+        <Stack.Screen name="Menu" component={MenuScreen} />
         
-        {/* Game screens: Back button goes to Menu */}
-        <Stack.Screen
-          name="BuildThePC"
-          component={BuildThePCScreen}
-          options={({ navigation }) => ({
-            headerShown: true,
-            headerTitle: 'BuildThePC',
-            headerLeft: () => (
-              <TouchableOpacity 
-                onPress={() => navigation.navigate('Menu')}
-                style={{ marginLeft: 16, padding: 8 }}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.text }}>←</Text>
-              </TouchableOpacity>
-            ),
-          })}
-        />
-        <Stack.Screen
-          name="CircuitConnect"
-          component={CircuitConnectScreen}
-          options={({ navigation }) => ({
-            headerShown: true,
-            headerTitle: 'CircuitConnect',
-            headerLeft: () => (
-              <TouchableOpacity 
-                onPress={() => navigation.navigate('Menu')}
-                style={{ marginLeft: 16, padding: 8 }}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.text }}>←</Text>
-              </TouchableOpacity>
-            ),
-          })}
-        />
-        <Stack.Screen
-          name="DebugInterface"
-          component={DebugInterfaceScreen}
-          options={({ navigation }) => ({
-            headerShown: true,
-            headerTitle: 'DebugInterface',
-            headerLeft: () => (
-              <TouchableOpacity 
-                onPress={() => navigation.navigate('Menu')}
-                style={{ marginLeft: 16, padding: 8 }}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.text }}>←</Text>
-              </TouchableOpacity>
-            ),
-          })}
-        />
+        {/* Game screens: No header (custom back buttons handled in screens) */}
+        <Stack.Screen name="BuildThePC" component={BuildThePCScreen} />
+        <Stack.Screen name="CircuitConnect" component={CircuitConnectScreen} />
+        <Stack.Screen name="DebugInterface" component={DebugInterfaceScreen} />
         
         {/* CompletionScreen: No header */}
-        <Stack.Screen
-          name="Completion"
-          component={CompletionScreen}
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="Completion" component={CompletionScreen} />
       </Stack.Navigator>
     </NavigationIndependentTree>
   );

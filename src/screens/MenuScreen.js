@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   headingImage: {
     width: 220,
     height: 55,
-    marginTop: -20,
+    marginTop: 70,
     marginBottom: 0,
   },
   headingAccentImage: {

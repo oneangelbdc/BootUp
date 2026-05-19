@@ -146,6 +146,9 @@ function LevelSelectScreen({ navigation }) {
     <View style={ls.container}>
       <View style={ls.decorCircle} />
       <View style={ls.header}>
+          <TouchableOpacity style={ls.backBtn} onPress={() => navigation.navigate('Menu')}>
+            <Text style={ls.backText}>←</Text>
+          </TouchableOpacity>
         <View>
           <Text style={ls.headerTitle}>Build The PC</Text>
           <Text style={ls.headerSub}>Choose your difficulty</Text>
@@ -337,9 +340,9 @@ function GameScreen({ navigation, route }) {
       <View style={styles.decorCircle} />
       
       <View style={styles.header}>
-        {/* ✅ FIXED: Navigate to PCLevels (level select) instead of using goBack() */}
+        {/* ✅ FIXED: CircuitConnect-style back button */}
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('PCLevels')}>
-          <Text style={styles.backText}>← Level Select</Text>
+          <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuBtn} onPress={() => setMenuVisible(true)}>
           <Text style={styles.menuText}>Menu</Text>
@@ -352,7 +355,7 @@ function GameScreen({ navigation, route }) {
           <View style={[styles.statusDot, {
             backgroundColor: placedPartIds.length === originalPartsList.length ? '#1D9E75' : level.accentColor,
           }]} />
-          <Text style={styles.statusText}>BUILD THE PC</Text>
+          <Text style={styles.statusText}>SELECT PART → TAP CORRECT SLOT</Text>
         </View>
         <View style={[styles.levelPill, { backgroundColor: level.badgeBg }]}>
           <Text style={[styles.levelPillText, { color: level.badgeColor }]}>
@@ -362,16 +365,24 @@ function GameScreen({ navigation, route }) {
       </View>
 
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <TouchableOpacity style={styles.navBanner} onPress={scrollToInventory} activeOpacity={0.7}>
-          <Text style={styles.navBannerText}>Go To Inventory ↓</Text>
-        </TouchableOpacity>
+        {/* ✅ Only show "Go To Inventory" button for Hard level */}
+        {isHard && (
+          <TouchableOpacity style={styles.navBanner} onPress={scrollToInventory} activeOpacity={0.7}>
+            <Text style={styles.navBannerText}>Go To Inventory ↓</Text>
+          </TouchableOpacity>
+        )}
 
         <View style={styles.boardWrapper}>
           {isHard && renderIOSlot()}
           <ImageBackground
             source={bgSource}
-            style={[styles.motherboard, isNewEasy && styles.pcCaseStyle]}
-            imageStyle={styles.motherboardImage}
+            style={[
+              styles.motherboard, 
+              isNewEasy && styles.pcCaseStyle,
+              isMedium && styles.mediumMotherboardStyle,
+              isHard && styles.hardMotherboardStyle,
+            ]}
+            imageStyle={isNewEasy ? styles.pcCaseImageStyle : styles.motherboardImage}
           >
             {isNewEasy ? (
               <>
@@ -409,7 +420,7 @@ function GameScreen({ navigation, route }) {
         </View>
 
         <View style={styles.inventoryContainer}>
-          <Text style={styles.inventoryLabel}>INVENTORY</Text>
+          <Text style={styles.inventoryLabel}>PARTS INVENTORY</Text>
           <View style={styles.inventory}>
             {/* ✅ Use shuffledPartsList for randomized inventory order */}
             {shuffledPartsList.map(part => (
@@ -426,9 +437,12 @@ function GameScreen({ navigation, route }) {
           </View>
         </View>
 
-        <TouchableOpacity style={[styles.navBanner, styles.bottomBanner]} onPress={scrollToMotherboard} activeOpacity={0.7}>
-          <Text style={styles.navBannerText}>Back to Motherboard ↑</Text>
-        </TouchableOpacity>
+        {/* ✅ Only show "Back to Motherboard" button for Hard level */}
+        {isHard && (
+          <TouchableOpacity style={[styles.navBanner, styles.bottomBanner]} onPress={scrollToMotherboard} activeOpacity={0.7}>
+            <Text style={styles.navBannerText}>Back to Motherboard ↑</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
 
       {/* ✅ UPDATED FOOTER TOOLBAR WITH PNG ICONS + CIRCLES */}
@@ -502,11 +516,44 @@ const styles = StyleSheet.create({
     width: 160, height: 160, borderRadius: 80,
     backgroundColor: theme.colors.primary, opacity: 0.12,
   },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 10 },
-  backBtn: { backgroundColor: theme.colors.white, padding: 10, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3, marginTop: 15 },
-  backText: { fontWeight: '700', color: theme.colors.text, fontSize: 13 },
-  menuBtn: { backgroundColor: theme.colors.white, padding: 10, paddingHorizontal: 20, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3, marginTop: 15 },
-  menuText: { fontWeight: '700', color: theme.colors.text },
+  // ✅ UPDATED: CircuitConnect-style header (removed marginTop: 75)
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingHorizontal: 16, 
+    marginBottom: 10 
+  },
+// ✅ FIXED backBtn style
+backBtn: { 
+  marginTop: 80,
+  backgroundColor: theme.colors.white,   
+  borderWidth: 1, 
+  borderRadius: 3,
+  height: 40,
+  width: 70,
+},
+
+// ✅ FIXED backText style
+backText: { 
+  fontWeight: '700', 
+  fontSize: 40,
+  color: theme.colors.text, 
+  marginLeft: 14,
+  marginTop: -15
+},
+  menuBtn: { 
+    marginTop: 80,
+    backgroundColor: '#A6D5FA', 
+    borderWidth: 1.5, 
+    borderRadius: 8, 
+    paddingVertical: 8, 
+    paddingHorizontal: 15 
+  },
+  menuText: { 
+    fontWeight: '700', 
+    color: theme.colors.text 
+  },
 
   // ✅ Status Bar Styles
   statusBar: { 
@@ -517,16 +564,46 @@ const styles = StyleSheet.create({
   },
   statusLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   statusDot: { width: 10, height: 10, borderRadius: 5 },
-  statusText: { fontSize: 11, fontWeight: '700', letterSpacing: 1, color: theme.colors.text },
+  statusText: { fontSize: 9, fontWeight: '700', letterSpacing: 1, color: theme.colors.text },
   levelPill: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
   levelPillText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
 
   scrollContent: { paddingVertical: 20, alignItems: 'center' },
   boardWrapper: { flexDirection: 'row', alignItems: 'flex-start', width: BOARD_W + IO_W * 0.25 },
   ioSlotOuter: { width: IO_W, height: BOARD_H * 0.45, marginTop: BOARD_H * 0.01, marginRight: -(IO_W * 0.75), zIndex: 10, borderWidth: 2, borderColor: 'white', borderStyle: 'dashed', backgroundColor: 'rgba(79, 209, 197, 0.05)', borderRadius: 4, overflow: 'hidden' },
-  motherboard: { width: BOARD_W, aspectRatio: 0.65, backgroundColor: '#1B4D3E', borderWidth: 2, borderColor: '#0F2E25', borderRadius: 8, overflow: 'hidden', zIndex: 1 },
-  pcCaseStyle: { backgroundColor: '#2C3E50', borderColor: '#4A6572' },
+  
+  // ✅ Base motherboard style (shared by Medium and Hard)
+  motherboard: { 
+    width: BOARD_W, 
+    borderWidth: 0,
+    overflow: 'hidden', 
+    zIndex: 1,
+  },
+  
+  // ✅ Easy level PC case style
+  pcCaseStyle: { 
+    backgroundColor: 'transparent', 
+    aspectRatio: 1,
+    marginLeft: 5,
+    marginTop: -15
+  },
+  
+  // ✅ Medium level motherboard style override
+  mediumMotherboardStyle: {
+    aspectRatio: 1,
+    marginTop: -15,
+    marginLeft: 5
+  },
+  
+  // ✅ Hard level motherboard style override
+  hardMotherboardStyle: {
+    aspectRatio: 0.65,
+  },
+  
+  // ✅ Image resize modes
   motherboardImage: { resizeMode: 'stretch' },
+  pcCaseImageStyle: { resizeMode: 'contain' }, // Prevent distortion for PC case image
+  
   slotBase: { position: 'absolute', borderWidth: 2, borderColor: 'white', borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
   slotFilled: { borderWidth: 0, backgroundColor: 'transparent' },
   slotHintGlow: { borderColor: 'yellow', borderWidth: 3 },
@@ -559,11 +636,11 @@ const styles = StyleSheet.create({
   pchSlot: { top: '58%', left: '59%', width: '28%', height: '22%' },
   sataSlot: { top: '69%', left: '93%', width: '7%', height: '15%' },
   cmosSlot: { top: '86%', left: '89%', width: '10%', height: '7%', borderRadius: 100 },
-  navBanner: { marginBottom: 5, paddingVertical: 8, paddingHorizontal: 20, backgroundColor: 'rgba(66, 153, 225, 0.9)', borderRadius: 20, borderWidth: 1, borderColor: '#FFF' },
+  navBanner: { marginTop: -20, marginBottom: 5, paddingVertical: 8, paddingHorizontal: 20, backgroundColor: 'rgba(66, 153, 225, 0.9)', borderRadius: 20, borderWidth: 1, borderColor: '#FFF' },
   bottomBanner: { marginTop: 10, marginBottom: 160 },
   navBannerText: { color: '#FFF', fontSize: 11, fontWeight: 'bold' },
-  inventoryContainer: { width: '100%', padding: 15, marginTop: 10 },
-  inventoryLabel: { fontSize: 12, color: '#000000', textAlign: 'center', marginBottom: 10 },
+  inventoryContainer: { width: '100%', padding: 15, marginTop: -10 },
+  inventoryLabel: { fontSize: 12, fontWeight: 600, color: '#000000', textAlign: 'center', marginBottom: 10 },
   inventory: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
   partCard: { backgroundColor: '#FFFFFF', borderRadius: 8, padding: 8, width: SCREEN_W * 0.26, alignItems: 'center' },
   partPlaced: { opacity: 0.3 },
@@ -610,11 +687,54 @@ const ls = StyleSheet.create({
     width: 160, height: 160, borderRadius: 80,
     backgroundColor: theme.colors.primary, opacity: 0.12,
   },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 20, gap: 12 },
-  headerTitle: { fontSize: 33, fontWeight: '700', color: theme.colors.text, marginTop: -20},
-  headerSub: { fontSize: 22, color: theme.colors.textLight, marginTop: 1 },
+  header: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingHorizontal: 16, 
+    marginBottom: 20, 
+    gap: 12 
+  },
+  // ✅ ADDED: CircuitConnect-style back button for LevelSelectScreen
+  backBtn: { 
+    marginTop: 50, 
+    backgroundColor: theme.colors.white, 
+    padding: 10, 
+    borderRadius: theme.radius.sm, 
+    elevation: 2, 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 1 }, 
+    shadowOpacity: 0.08, 
+    shadowRadius: 3 
+  },
+  backText: { 
+    fontSize: 18, 
+    color: theme.colors.text 
+  },
+  headerTitle: { 
+    marginTop: 50, // ✅ Changed from 80 to 50 to match CircuitConnect
+    fontSize: 18, 
+    fontWeight: '700', 
+    color: theme.colors.text 
+  },
+  headerSub: { 
+    fontSize: 12, 
+    color: theme.colors.textLight, 
+    marginTop: 1 
+  },
   list: { paddingHorizontal: 16 },
-  card: { backgroundColor: theme.colors.white, borderRadius: 16, borderWidth: 1.5, flexDirection: 'row', overflow: 'hidden', elevation: 3, marginBottom: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6 },
+  card: { 
+    backgroundColor: theme.colors.white, 
+    borderRadius: 16, 
+    borderWidth: 1.5, 
+    flexDirection: 'row', 
+    overflow: 'hidden', 
+    elevation: 3, 
+    marginBottom: 14, 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowOpacity: 0.06, 
+    shadowRadius: 6 
+  },
   cardBar: { width: 5 },
   cardBody: { flex: 1, padding: 16 },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
