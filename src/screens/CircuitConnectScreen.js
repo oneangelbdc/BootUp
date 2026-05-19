@@ -34,9 +34,9 @@ import {
   ScrollView,
   Animated,
   Image,
+  Modal,
 } from 'react-native';
 import { theme } from '../styles/theme';
-import PowerUpToolbar from '../components/PowerUpToolbar';
 import InGameMenu from '../components/InGameMenu';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -178,7 +178,7 @@ const LEVELS = {
       { id: 'hdd',        label: 'Hard Drive',        icon: '💿', col: 0, row: 2 },
       { id: 'keyboard',   label: 'Keyboard',          icon: '⌨️', col: 0, row: 3 },
       // ── RIGHT column: what each part plugs into ───────────────────────────
-      { id: 'dp_cable',   label: 'HDMI Cable', icon: '🔵', col: 1, row: 0 },
+      { id: 'dp_cable',   label: 'DisplayPort Cable', icon: '🔵', col: 1, row: 0 },
       { id: 'cpu_socket', label: 'CPU Socket',        icon: '🟫', col: 1, row: 1 },
       { id: 'sata_cable', label: 'SATA Cable',        icon: '🔌', col: 1, row: 2 },
       { id: 'usb_port',   label: 'USB-A Port',        icon: '⬜', col: 1, row: 3 },
@@ -189,17 +189,29 @@ const LEVELS = {
       ['hdd',      'sata_cable'], // Hard Drive ↔ SATA data cable
       ['keyboard', 'usb_port'],   // USB keyboard ↔ USB-A port
     ],
+    // hints[] — one per pair in this level, shown one at a time when the player
+    // taps the Hint power-up. Each hint names BOTH devices in the pair so the
+    // player knows exactly which connection it's describing.
     hints: [
-      'Monitor sends video through a DisplayPort (or HDMI) Cable.',
-      'The CPU seats directly into the CPU Socket on the motherboard.',
-      'Hard Drive uses a SATA Cable to talk to the motherboard.',
-      'A USB Keyboard plugs into a USB-A Port.',
+      'Pair 1 — Monitor + DisplayPort Cable: The Monitor connects to the GPU via a DisplayPort (or HDMI) cable to receive the video signal.',
+      'Pair 2 — CPU + CPU Socket: The CPU is a flat chip that locks into the CPU Socket (LGA or AM5 style) on the motherboard.',
+      'Pair 3 — Hard Drive + SATA Cable: Hard Drives send data to the motherboard through a thin SATA data cable plugged into a SATA port.',
+      'Pair 4 — Keyboard + USB-A Port: A wired USB keyboard plugs into the rectangular USB-A port on the back panel of your PC.',
     ],
+    // wrongMessages[] — only mentions parts that actually exist in THIS level.
     wrongMessages: [
-      "Those two don't physically connect! Check ports and sockets.",
-      "Not quite — what does that part actually plug into?",
-      "Wrong match! Think about what connector that device uses.",
+      "Nope! The 4 pairs here are: Monitor→Cable, CPU→Socket, Hard Drive→SATA, Keyboard→USB.",
+      "Not quite! Does a CPU really plug into a SATA Cable? Think about what each part actually connects to.",
+      "Wrong match! Hint: every part on the left connects to exactly one part on the right in this level.",
     ],
+    // learnings{} — a short educational fact shown as a green toast the moment
+    // the player confirms a correct pair. Key = left-column device id.
+    learnings: {
+      monitor:  '✅ DisplayPort carries digital video + audio up to 8K. It replaced the older VGA and DVI connectors on modern monitors.',
+      cpu:      '✅ The CPU Socket (e.g. LGA1700 or AM5) uses hundreds of pins or pads to connect the CPU to the motherboard power and data lanes.',
+      hdd:      '✅ SATA III cables transfer data at up to 6 Gbps. They are L-shaped to prevent accidental removal inside the case.',
+      keyboard: '✅ USB-A is the flat rectangular USB plug. Keyboards send keypress signals over it to the CPU using just 5V of power.',
+    },
   },
 
   // ── MEDIUM ────────────────────────────────────────────────────────────────
@@ -232,16 +244,22 @@ const LEVELS = {
       ['cpu_cooler', 'cpu_top'],   // CPU cooler mounts on top of the CPU die
     ],
     hints: [
-      'Graphics Card plugs into the long PCIe x16 slot.',
-      'RAM Stick clicks into a DIMM Slot on the motherboard.',
-      'PSU delivers power through the 24-pin ATX Connector.',
-      'CPU Cooler mounts directly on top of the CPU.',
+      'Pair 1 — Graphics Card + PCIe x16 Slot: The GPU slides into the long PCIe x16 slot on the motherboard and is secured with a screw.',
+      'Pair 2 — RAM Stick + DIMM Slot: RAM sticks click into the DIMM slots on the motherboard. Most boards have 2 or 4 slots.',
+      'Pair 3 — Power Supply + 24-pin ATX Connector: The PSU delivers main power to the motherboard through the wide 24-pin ATX connector.',
+      'Pair 4 — CPU Cooler + CPU (top): The CPU Cooler sits directly on top of the CPU, transferring heat away from the processor die.',
     ],
     wrongMessages: [
-      "Wrong slot! Those two don't physically mate.",
-      "Nope — think about which connector or slot that part fits into.",
-      "Incorrect — consider what socket or port that component uses.",
+      "Nope! The 4 pairs here are: GPU→PCIe x16, RAM→DIMM Slot, PSU→24-pin ATX, CPU Cooler→CPU.",
+      "Wrong match! Does a RAM Stick really go into a PCIe slot? Think about where each component physically seats.",
+      "Incorrect! Every component on the left connects to exactly one slot or connector on the right in this level.",
     ],
+    learnings: {
+      gpu:        '✅ PCIe x16 is the longest slot on the motherboard. It provides 16 lanes of bandwidth — enough for modern GPUs at full speed.',
+      ram:        '✅ DIMM slots have a notch that prevents RAM from being inserted backwards. DDR5 RAM only fits DDR5 slots — they are not interchangeable.',
+      psu:        '✅ The 24-pin ATX connector supplies 3.3V, 5V, and 12V power rails to the motherboard. It is the largest connector from the PSU.',
+      cpu_cooler: '✅ CPU Coolers use a metal heatsink and fan (or liquid) to draw heat off the CPU. Without one the CPU would overheat in seconds.',
+    },
   },
 
   // ── HARD ──────────────────────────────────────────────────────────────────
@@ -274,17 +292,56 @@ const LEVELS = {
       ['wifi_card', 'pcie_x1'],    // Wi-Fi card uses the short PCIe x1 slot
     ],
     hints: [
-      'NVMe SSD slides into the M.2 Slot and is screwed down.',
-      'Thermal Paste is applied directly to the CPU IHS (Integrated Heat Spreader).',
-      'Case Fan connects to a 4-pin Fan Header on the motherboard.',
-      'Wi-Fi Card uses the short PCIe x1 Slot — not the long x16 one.',
+      'Pair 1 — NVMe SSD + M.2 Slot: An NVMe SSD is a small stick that slides diagonally into the M.2 slot and is held down by a single screw.',
+      'Pair 2 — Thermal Paste + CPU IHS: Thermal paste is applied to the CPU IHS (the flat metal lid) before the cooler is mounted, to fill microscopic air gaps.',
+      'Pair 3 — Case Fan + Fan Header (4-pin): Case fans plug into 3 or 4-pin Fan Headers on the motherboard so the system can control fan speed.',
+      'Pair 4 — Wi-Fi Card + PCIe x1 Slot: Wi-Fi PCIe cards use the short PCIe x1 slot — not the long x16 slot that the GPU uses.',
     ],
     wrongMessages: [
-      "Wrong connection! Those parts don't interface in a real build.",
-      "Incorrect — think about the physical slot or header each part uses.",
-      "Not quite — a Wi-Fi card doesn't go in the same slot as a GPU!",
+      "Nope! The 4 pairs here are: NVMe→M.2 Slot, Thermal Paste→CPU IHS, Case Fan→Fan Header, Wi-Fi Card→PCIe x1.",
+      "Wrong match! A Wi-Fi Card does NOT go in the PCIe x16 slot — that one is for the GPU. It uses the shorter PCIe x1.",
+      "Incorrect! Think carefully: does Thermal Paste plug into a slot? No — it's applied to a surface (the CPU IHS).",
     ],
+    learnings: {
+      nvme:      '✅ NVMe SSDs use the PCIe bus directly through the M.2 slot, reaching 7,000+ MB/s — far faster than SATA drives at 600 MB/s.',
+      thermal:   '✅ The CPU IHS (Integrated Heat Spreader) is the silver lid on top of the CPU. Thermal paste fills the microscopic gaps between it and the cooler.',
+      case_fan:  '✅ A 4-pin PWM Fan Header lets the motherboard control fan RPM automatically based on CPU temperature, reducing noise at idle.',
+      wifi_card: '✅ PCIe x1 slots have just 1 lane of bandwidth — enough for Wi-Fi cards, sound cards, and USB expansion cards, but not GPUs.',
+    },
   },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DEVICE SPECS — shown in the 📋 Specs modal (one fact per device)
+// ─────────────────────────────────────────────────────────────────────────────
+const DEVICE_SPECS = {
+  // Easy
+  monitor:    'Displays visual output from the GPU. Connects via DisplayPort or HDMI cable. Supports up to 8K resolution on modern panels.',
+  cpu:        'Central Processing Unit — the brain of the PC. Seats into the CPU Socket on the motherboard. Executes all program instructions.',
+  hdd:        'Hard Disk Drive — magnetic storage for files and OS. Connects to the motherboard via a SATA data cable at up to 6 Gbps.',
+  keyboard:   'Primary text input device. Connects to a USB-A port on the back panel. Uses 5V of power to send keypress signals to the CPU.',
+  dp_cable:   'DisplayPort Cable — carries digital video and audio up to 8K @ 60Hz. Connects monitor to GPU or motherboard video output.',
+  cpu_socket:'The CPU Socket (e.g. LGA1700, AM5) holds the CPU in place on the motherboard using hundreds of pins or contact pads.',
+  sata_cable: 'Serial ATA data cable — connects HDDs and SSDs to the motherboard. L-shaped connector prevents accidental removal.',
+  usb_port:   'USB-A Port — the standard rectangular USB connector. Accepts keyboards, mice, drives, and other peripherals at up to 10 Gbps (USB 3.2).',
+  // Medium
+  gpu:        'Graphics Processing Unit — renders images and video. Seats into the long PCIe x16 slot. Powers displays via HDMI or DisplayPort.',
+  ram:        'RAM Stick — volatile short-term memory. Clicks into DIMM slots. DDR5 is the latest standard; not interchangeable with DDR4.',
+  psu:        'Power Supply Unit — converts AC mains power to DC voltages (3.3V, 5V, 12V) used by all PC components.',
+  cpu_cooler: 'CPU Cooler — heatsink + fan (or liquid loop) that draws heat away from the CPU die to prevent thermal throttling.',
+  pcie_slot:  'PCIe x16 Slot — the longest expansion slot on the motherboard. Provides 16 high-speed lanes for GPUs.',
+  dimm_slot:  'DIMM Slot — holds RAM sticks. A notch prevents backward insertion. Most boards have 2 or 4 slots.',
+  pin24:      '24-pin ATX Connector — the main power connector from PSU to motherboard. Supplies 3.3V, 5V, and 12V rails.',
+  cpu_top:    'CPU IHS (top surface) — the flat metal lid of the CPU that contacts the cooler. Thermal paste is applied here.',
+  // Hard
+  nvme:       'NVMe SSD — high-speed storage using the PCIe bus through the M.2 slot. Reaches 7,000+ MB/s, over 10× faster than SATA.',
+  thermal:    'Thermal Paste — fills microscopic air gaps between the CPU IHS and cooler base to maximise heat transfer.',
+  case_fan:   'Case Fan — moves air through the PC case. Plugs into a 3 or 4-pin Fan Header. PWM (4-pin) allows automatic speed control.',
+  wifi_card:  'Wi-Fi PCIe Card — adds wireless networking. Uses the short PCIe x1 slot, not the long x16 slot used by GPUs.',
+  m2_slot:    'M.2 Slot — a compact connector on the motherboard for NVMe SSDs. The drive slides in at an angle and is screwed down.',
+  cpu_ihs:    'CPU IHS (Integrated Heat Spreader) — the silver lid on top of the CPU. Thermal paste is applied to it before mounting the cooler.',
+  fan_header: '4-pin PWM Fan Header — connects case fans to the motherboard so the system can control fan speed based on temperature.',
+  pcie_x1:    'PCIe x1 Slot — the shortest expansion slot. Provides 1 PCIe lane. Used for Wi-Fi cards, sound cards, and USB hubs.',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -386,7 +443,7 @@ function DeviceNode({ device, isSelected, isConnected, isWrong, onPress, accentC
           isWrong     && nd.nodeWrong,
         ]}
         onPress={onPress}
-        disabled={isConnected} // locked once confirmed as part of a correct pair
+        disabled={false} // taps always allowed; handleTap guards connected cards after inspect check
         activeOpacity={0.8}
       >
         {/*
@@ -609,9 +666,15 @@ function GameScreen({ navigation, route }) {
   const [hintIdx, setHintIdx]           = useState(0);
   const [menuVisible, setMenuVisible]   = useState(false);
   const [errorMsg, setErrorMsg]         = useState('');
+  const [learnMsg, setLearnMsg]         = useState('');  // green learning toast shown on correct match
   const [shuffleKey, setShuffleKey]     = useState(0); // increment to trigger re-scramble on restart
+  const [showSpecs, setShowSpecs]       = useState(false); // specs modal
+  const [showHint, setShowHint]         = useState(false); // hint banner below status bar
+  const [showInspect, setShowInspect]   = useState(false); // inspect banner
+  const inspectRef = useRef(false); // ref mirrors showInspect — avoids stale closure in handleTap
 
   const errorAnim     = useRef(new Animated.Value(0)).current; // drives error banner opacity + translateY
+  const learnAnim     = useRef(new Animated.Value(0)).current; // drives green learning toast opacity
   const wrongTimerRef = useRef(null);                           // clears the wrong-flash timeout
 
   // Scrambled device layout — recalculated only when the level or shuffleKey changes
@@ -645,7 +708,39 @@ function GameScreen({ navigation, route }) {
     ]).start(() => setErrorMsg(''));
   }, []);
 
-  // Main tap handler
+  // Animates the green learning toast: slide in → wait → fade out
+  const showLearning = useCallback((msg) => {
+    setLearnMsg(msg);
+    learnAnim.setValue(0);
+    Animated.sequence([
+      Animated.timing(learnAnim, { toValue: 1, duration: 250, useNativeDriver: true }),
+      Animated.delay(2800),
+      Animated.timing(learnAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start(() => setLearnMsg(''));
+  }, []);
+
+  // ── Stable inspect handler — uses ref so it never has a stale closure ─────
+  // Called directly from DeviceNode onPress when inspectRef.current is true.
+  const handleInspect = useCallback((id) => {
+    const device = level.devices.find((d) => d.id === id);
+    const pair   = level.correct.find((p) => p[0] === id || p[1] === id);
+    if (pair && device) {
+      const partnerId  = pair[0] === id ? pair[1] : pair[0];
+      const partnerDev = level.devices.find((d) => d.id === partnerId);
+      const hintForPair = level.hints[level.correct.indexOf(pair)] || '';
+      Alert.alert(
+        `🔍 ${device.label}`,
+        `Connects to: ${partnerDev?.label}
+
+${hintForPair}`,
+        [{ text: 'Got it!' }],
+      );
+    }
+    inspectRef.current = false;
+    setShowInspect(false);
+  }, [level]);
+
+  // Main tap handler — only called when NOT in inspect mode
   const handleTap = (id) => {
     if (connectedIds.has(id)) return; // ignore taps on locked cards
 
@@ -667,6 +762,12 @@ function GameScreen({ navigation, route }) {
       const newIds   = new Set([...connectedIds, a, b]);
       setConnections(newConns);
       setConnectedIds(newIds);
+
+      // Show a learning fact for this specific pair (keyed by the left-column device id)
+      const leftId = [a, b].find((id) => level.devices.find((d) => d.id === id && d.col === 0));
+      if (level.learnings && level.learnings[leftId]) {
+        showLearning(level.learnings[leftId]);
+      }
 
       // All pairs done → navigate to Completion screen after a short delay
       if (newConns.length === level.pairs) {
@@ -701,6 +802,11 @@ function GameScreen({ navigation, route }) {
     setHintIdx(0);
     setMenuVisible(false);
     setErrorMsg('');
+    setLearnMsg('');
+    setShowSpecs(false);
+    setShowHint(false);
+    setShowInspect(false);
+    inspectRef.current = false;
     setShuffleKey((k) => k + 1); // triggers useMemo to re-run scramblePositions
   };
 
@@ -710,11 +816,12 @@ function GameScreen({ navigation, route }) {
     <View style={g.container}>
       <View style={g.decorCircle} />
 
-      {/* Header: back arrow + menu button */}
+      {/* Header: back button | centered title | menu button */}
       <View style={g.header}>
         <TouchableOpacity style={g.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={g.backText}>Level Select</Text>
+          <Text style={g.backText}>←</Text>
         </TouchableOpacity>
+        <Text style={g.headerTitle}>Circuit Connect</Text>
         <TouchableOpacity style={g.menuBtn} onPress={() => setMenuVisible(true)}>
           <Text style={g.menuText}>Menu</Text>
         </TouchableOpacity>
@@ -741,6 +848,24 @@ function GameScreen({ navigation, route }) {
         Tap a part on the LEFT, then its match on the RIGHT
       </Text>
 
+      {/* ── HINT BANNER — shows current hint when showHint is true ── */}
+      {showHint && (
+        <View style={g.hintWrapper}>
+          <Text style={g.hintText}>
+            💡 {level.hints[hintIdx % level.hints.length]}
+          </Text>
+        </View>
+      )}
+
+      {/* ── INSPECT BANNER — reminds player they are in inspect mode ── */}
+      {showInspect && (
+        <View style={g.inspectWrapper}>
+          <Text style={g.inspectText}>
+            🔍 INSPECT MODE — tap any card to see what it connects to
+          </Text>
+        </View>
+      )}
+
       {/* Selected-device indicator (or invisible placeholder to prevent layout shift) */}
       {selectedDevice ? (
         <View style={[g.selectedBar, { borderColor: level.accentColor, backgroundColor: level.badgeBg + '88' }]}>
@@ -761,6 +886,17 @@ function GameScreen({ navigation, route }) {
         pointerEvents="none"
       >
         <Text style={g.errorText}>{errorMsg}</Text>
+      </Animated.View>
+
+      {/* Green learning toast — slides in from above on each correct match */}
+      <Animated.View
+        style={[g.learnBanner, {
+          opacity: learnAnim,
+          transform: [{ translateY: learnAnim.interpolate({ inputRange: [0, 1], outputRange: [-10, 0] }) }],
+        }]}
+        pointerEvents="none"
+      >
+        <Text style={g.learnText}>{learnMsg}</Text>
       </Animated.View>
 
       {/* Mistake dots: one dot per mistake, max 5 shown, then "+N" overflow */}
@@ -795,36 +931,86 @@ function GameScreen({ navigation, route }) {
             isSelected={selected === device.id}
             isConnected={connectedIds.has(device.id)}
             isWrong={wrongIds.has(device.id)}
-            onPress={() => handleTap(device.id)}
+            onPress={() => inspectRef.current ? handleInspect(device.id) : handleTap(device.id)}
             accentColor={level.accentColor}
             badgeBg={level.badgeBg}
           />
         ))}
       </View>
 
-      {/* Power-up toolbar: Hint / Help / Inspect */}
-      <PowerUpToolbar
-        onHint={() => {
-          // Cycle through hints; wrap around with modulo
-          const hint = level.hints[hintIdx % level.hints.length];
-          setHintIdx((i) => i + 1);
-          Alert.alert('Hint 💡', hint, [{ text: 'Got it!' }]);
-        }}
-        onHelp={() =>
-          Alert.alert(
-            'How to play',
-            'Tap a component on the LEFT side.\nThen tap its matching slot or connector on the RIGHT side.\n\nParts are shuffled every game — you can\'t guess by position!\n\nGreen lines show completed connections.',
-            [{ text: 'OK!' }],
-          )
-        }
-        onInspect={() =>
-          Alert.alert(
-            'Progress 🔍',
-            `✅ ${connections.length} of ${level.pairs} pairs connected\n❌ ${mistakes} mistake${mistakes !== 1 ? 's' : ''} so far`,
-            [{ text: 'Keep going!' }],
-          )
-        }
-      />
+      {/* ── INLINE POWER-UP TOOLBAR ──────────────────────────────────────
+           📋 Specs   — opens a modal listing all pairs in this level
+           💡 Hint    — toggles a banner showing the current hint
+           🔍 Inspect — toggles inspect mode; tapping a card shows its pair
+      ─────────────────────────────────────────────────────────────────── */}
+      <View style={g.footerToolbar}>
+
+        {/* 📋 Specs button — shows all pairs for this level */}
+        <TouchableOpacity
+          style={g.toolBtn}
+          onPress={() => setShowSpecs(true)}
+          activeOpacity={0.8}
+        >
+          <View style={g.toolBtnCircle}>
+            <Text style={g.toolBtnIcon}>📋</Text>
+          </View>
+          <Text style={g.toolBtnLabel}>Specs</Text>
+        </TouchableOpacity>
+
+        {/* 💡 Hint button — toggles hint banner, advances hint index each open */}
+        <TouchableOpacity
+          style={g.toolBtn}
+          onPress={() => {
+            if (!showHint) setHintIdx((i) => i + 1); // advance hint on each open
+            if (!showHint && showInspect) setShowInspect(false); // mutual exclusion
+            setShowHint((v) => !v);
+          }}
+          activeOpacity={0.8}
+        >
+          <View style={[g.toolBtnCircle, showHint && g.toolBtnCircleActive]}>
+            <Text style={g.toolBtnIcon}>💡</Text>
+          </View>
+          <Text style={g.toolBtnLabel}>Hint</Text>
+        </TouchableOpacity>
+
+        {/* 🔍 Inspect button — toggles inspect mode */}
+        <TouchableOpacity
+          style={g.toolBtn}
+          onPress={() => {
+            if (!showInspect && showHint) setShowHint(false); // mutual exclusion
+            const next = !showInspect;
+            inspectRef.current = next;
+            setShowInspect(next);
+          }}
+          activeOpacity={0.8}
+        >
+          <View style={[g.toolBtnCircle, showInspect && g.toolBtnCircleActive]}>
+            <Text style={g.toolBtnIcon}>🔍</Text>
+          </View>
+          <Text style={g.toolBtnLabel}>Inspect</Text>
+        </TouchableOpacity>
+
+      </View>
+
+      {/* ── SPECS MODAL — shows name + description for every device in this level ── */}
+      <Modal visible={showSpecs} transparent animationType="fade">
+        <View style={g.modalBackdrop}>
+          <View style={g.modalContent}>
+            <Text style={g.modalTitle}>📋 {level.title} — Part Specs</Text>
+            <ScrollView style={{ marginBottom: 20 }}>
+              {level.devices.map((device) => (
+                <View key={device.id} style={g.specItem}>
+                  <Text style={g.specLabel}>{device.icon}  {device.label}</Text>
+                  <Text style={g.specDesc}>{DEVICE_SPECS[device.id] || 'A key PC hardware component.'}</Text>
+                </View>
+              ))}
+            </ScrollView>
+            <TouchableOpacity onPress={() => setShowSpecs(false)} style={g.closeBtn}>
+              <Text style={g.closeBtnText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* In-game pause menu overlay */}
       <InGameMenu
@@ -896,9 +1082,9 @@ const ls = StyleSheet.create({
   container:   { flex: 1, backgroundColor: theme.colors.background, paddingTop: 50 },
   decorCircle: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: theme.colors.primary, opacity: 0.12 },
   header:      { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 20, gap: 12 },
-  backBtn:     { marginTop: 50, backgroundColor: theme.colors.white, padding: 10, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 },
+  backBtn:     { backgroundColor: theme.colors.white, padding: 10, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 },
   backText:    { fontSize: 18, color: theme.colors.text },
-  headerTitle: { marginTop: 50, fontSize: 18, fontWeight: '700', color: theme.colors.text },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
   headerSub:   { fontSize: 12, color: theme.colors.textLight, marginTop: 1 },
   list:        { paddingHorizontal: 16 },
   card:        { backgroundColor: theme.colors.white, borderRadius: 16, borderWidth: 1.5, flexDirection: 'row', overflow: 'hidden', elevation: 3, marginBottom: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6 },
@@ -927,6 +1113,7 @@ const g = StyleSheet.create({
   header:                 { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 10 },
   backBtn:                { backgroundColor: theme.colors.white, padding: 10, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 },
   backText:               { fontWeight: '700', color: theme.colors.text, fontSize: 13 },
+  headerTitle:            { flex: 1, textAlign: 'center', fontSize: 16, fontWeight: '800', color: theme.colors.text, letterSpacing: 0.5 },
   menuBtn:                { backgroundColor: theme.colors.white, padding: 10, paddingHorizontal: 20, borderRadius: theme.radius.sm, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 },
   menuText:               { fontWeight: '700', color: theme.colors.text },
   statusBar:              { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.colors.white, marginHorizontal: 16, padding: 10, borderRadius: theme.radius.sm, marginBottom: 6, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 3 },
@@ -945,5 +1132,29 @@ const g = StyleSheet.create({
   mistakeDot:             { width: 8, height: 8, borderRadius: 4, backgroundColor: '#D94444' },
   mistakesExtra:          { fontSize: 11, color: '#D94444', fontWeight: '700' },
   mistakesLabel:          { fontSize: 11, color: '#D94444', fontWeight: '600' },
+  learnBanner:            { marginHorizontal: 16, marginBottom: 4, backgroundColor: '#E8F8F2', borderWidth: 1, borderColor: '#1D9E75', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 14, alignItems: 'center' },
+  learnText:              { fontSize: 11, fontWeight: '700', color: '#0F6E56', textAlign: 'center', lineHeight: 16 },
+  // ── Power-up toolbar styles ─────────────────────────────────────────────────
+  footerToolbar:          { flexDirection: 'row', backgroundColor: '#4299E1', justifyContent: 'space-around', alignItems: 'center', paddingVertical: 14, borderRadius: 25, marginHorizontal: 16, marginBottom: 10, elevation: 6 },
+  toolBtn:                { alignItems: 'center' },
+  toolBtnCircle:          { width: 50, height: 50, borderRadius: 25, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', marginBottom: 4, elevation: 2 },
+  toolBtnCircleActive:    { backgroundColor: '#FFD700' },
+  toolBtnIcon:            { fontSize: 24 },
+  toolBtnLabel:           { color: '#fff', fontSize: 10, fontWeight: '700' },
+  // ── Hint banner ──────────────────────────────────────────────────────────────
+  hintWrapper:            { marginHorizontal: 16, marginBottom: 6, backgroundColor: '#FFFBEB', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 14, borderWidth: 1.5, borderColor: '#F6E05E', alignItems: 'center' },
+  hintText:               { fontSize: 12, fontWeight: '700', color: '#B7791F', textAlign: 'center', lineHeight: 18 },
+  // ── Inspect banner ───────────────────────────────────────────────────────────
+  inspectWrapper:         { marginHorizontal: 16, marginBottom: 6, backgroundColor: '#EBF8FF', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 14, borderWidth: 1.5, borderColor: '#4A90E2', alignItems: 'center' },
+  inspectText:            { fontSize: 12, fontWeight: '700', color: '#2B6CB0', textAlign: 'center' },
+  // ── Specs modal ──────────────────────────────────────────────────────────────
+  modalBackdrop:          { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 },
+  modalContent:           { backgroundColor: '#2D3748', borderRadius: 15, padding: 20, maxHeight: '80%' },
+  modalTitle:             { color: '#fff', fontSize: 18, fontWeight: '800', marginBottom: 15, textAlign: 'center' },
+  specItem:               { marginBottom: 12, borderBottomWidth: 1, borderBottomColor: '#4A5568', paddingBottom: 8 },
+  specLabel:              { color: '#4FD1C5', fontSize: 13, fontWeight: '700' },
+  specDesc:               { color: '#E2E8F0', fontSize: 11, marginTop: 4, lineHeight: 16 },
+  closeBtn:               { backgroundColor: '#E53E3E', padding: 12, borderRadius: 8, alignItems: 'center' },
+  closeBtnText:           { color: '#fff', fontWeight: '700', fontSize: 14 },
   gameArea:               { position: 'relative', backgroundColor: theme.colors.white, marginHorizontal: 16, borderRadius: 16, marginBottom: 10, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, overflow: 'hidden' },
 });
