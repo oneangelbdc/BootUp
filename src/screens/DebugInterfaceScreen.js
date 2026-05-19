@@ -425,6 +425,20 @@ function DebugGameScreen({ navigation, route }) {
   // ── Image Container Ref (used for drag hit detection) ──
   const containerLayout  = useRef({ px: 0, py: 0, width: 1, height: 1 });
   const containerViewRef = useRef(null);
+ 
+  //  Close menu when level changes
+  useEffect(() => {
+    setMenuVisible(false);
+  }, [levelIndex]);
+
+  // Force menu closed every time screen gains focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setMenuVisible(false);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
 
   /* ──────────────────────────────────────────────────────
@@ -432,7 +446,7 @@ function DebugGameScreen({ navigation, route }) {
      This fires when navigation.replace() delivers a new
      levelIndex via route.params.
   ────────────────────────────────────────────────────── */
-  useEffect(() => {
+   useEffect(() => {
     if (current.type === 'spot' && current.bugs) {
       setBugStates(current.bugs.map(b => ({ ...b, isFixed: false })));
     }
@@ -833,7 +847,7 @@ function DebugGameScreen({ navigation, route }) {
           visible={menuVisible}
           onClose={() => setMenuVisible(false)}
           onRestart={redo}
-          onHome={() => navigation.navigate('Menu')}
+          onHome={() => {setMenuVisible(false); navigation.navigate('Menu');}}
         />
 
         {/* ── LEVEL COMPLETION POPUP ── */}
