@@ -178,13 +178,13 @@ const LEVELS = {
       { id: 'hdd',        label: 'Hard Drive',        icon: '💿', col: 0, row: 2 },
       { id: 'keyboard',   label: 'Keyboard',          icon: '⌨️', col: 0, row: 3 },
       // ── RIGHT column: what each part plugs into ───────────────────────────
-      { id: 'dp_cable',   label: 'DisplayPort Cable', icon: '🔵', col: 1, row: 0 },
+      { id: 'dp_cable',   label: 'HDMI Cable', icon: '🔵', col: 1, row: 0 },
       { id: 'cpu_socket', label: 'CPU Socket',        icon: '🟫', col: 1, row: 1 },
       { id: 'sata_cable', label: 'SATA Cable',        icon: '🔌', col: 1, row: 2 },
       { id: 'usb_port',   label: 'USB-A Port',        icon: '⬜', col: 1, row: 3 },
     ],
     correct: [
-      ['monitor',  'dp_cable'],   // Monitor ↔ DisplayPort cable (video output)
+      ['monitor',  'dp_cable'],   // Monitor ↔ HDMI Cable (video output)
       ['cpu',      'cpu_socket'], // CPU ↔ CPU Socket on the motherboard
       ['hdd',      'sata_cable'], // Hard Drive ↔ SATA data cable
       ['keyboard', 'usb_port'],   // USB keyboard ↔ USB-A port
@@ -234,7 +234,7 @@ const LEVELS = {
       // ── RIGHT column: slots / connectors they seat into ──────────────────
       { id: 'pcie_slot',  label: 'PCIe x16 Slot',   icon: '🟩', col: 1, row: 0 },
       { id: 'dimm_slot',  label: 'DIMM Slot',        icon: '🟦', col: 1, row: 1 },
-      { id: 'pin24',      label: '24-pin ATX Conn.', icon: '🔌', col: 1, row: 2 },
+      { id: 'pin24',      label: '24-pin ATX', icon: '🔌', col: 1, row: 2 },
       { id: 'cpu_top',    label: 'CPU (top)',         icon: '🔲', col: 1, row: 3 },
     ],
     correct: [
@@ -282,7 +282,7 @@ const LEVELS = {
       // ── RIGHT column: slots / headers they connect to ────────────────────
       { id: 'm2_slot',   label: 'M.2 Slot',        icon: '🟫', col: 1, row: 0 },
       { id: 'cpu_ihs',   label: 'CPU IHS',          icon: '🔲', col: 1, row: 1 },
-      { id: 'fan_header',label: 'Fan Header (4-pin)',icon: '📌', col: 1, row: 2 },
+      { id: 'fan_header',label: 'Fan Header',icon: '📌', col: 1, row: 2 },
       { id: 'pcie_x1',   label: 'PCIe x1 Slot',    icon: '🟩', col: 1, row: 3 },
     ],
     correct: [

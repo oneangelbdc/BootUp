@@ -54,7 +54,7 @@ const LESSONS = {
   
   CircuitConnect_easy: [
     {
-      title: 'Monitor → DisplayPort Cable',
+      title: 'Monitor → HDMI Cable',
       fact: 'The monitor receives video from the GPU through a DisplayPort or HDMI cable. DisplayPort supports up to 8K resolution and 240 Hz refresh rates.',
     },
     {
