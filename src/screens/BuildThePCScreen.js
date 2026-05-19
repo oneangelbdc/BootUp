@@ -243,6 +243,12 @@ function GameScreen({ navigation, route }) {
     return shuffleArray(originalPartsList);
   }, [originalPartsList, shuffleKey]);
 
+
+// ✅ Close menu when level changes (new mission selected)
+useEffect(() => {
+  setMenuVisible(false);
+}, [levelKey]); // Runs whenever levelKey changes
+
   // ✅ RESET LISTENER
   useEffect(() => {
     if (route.params?.reset) {
@@ -252,9 +258,18 @@ function GameScreen({ navigation, route }) {
 
   useEffect(() => {
     if (placedPartIds.length === originalPartsList.length && originalPartsList.length > 0) {
+      setMenuVisible(false);
       setTimeout(() => { navigation.navigate('Completion', { gameId: 'BuildThePC', levelKey }); }, 600);
     }
   }, [placedPartIds, originalPartsList.length]);
+
+  // ✅ ADD THIS: Force menu closed every time the level screen becomes active
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setMenuVisible(false);
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const handleReset = () => {
     setPlacedParts({}); 
@@ -515,6 +530,7 @@ function GameScreen({ navigation, route }) {
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
         onRestart={handleReset}
+        onHome={() => { setMenuVisible(false); navigation.navigate('Menu'); }}
       />
 
       <Modal visible={showSpecs} transparent animationType="fade">
