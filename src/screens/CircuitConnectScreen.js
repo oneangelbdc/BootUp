@@ -23,7 +23,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -684,6 +684,17 @@ function GameScreen({ navigation, route }) {
     [level, shuffleKey],
   );
 
+  useEffect(() => {
+    setMenuVisible(false);
+  }, [levelKey]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setMenuVisible(false);
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   // Board height = tallest row index + 1, converted to pixels
   const rows   = Math.max(...scrambledDevices.map((d) => d.row)) + 1;
   const GAME_H = rows * CELL_H + 16;
@@ -813,7 +824,11 @@ ${hintForPair}`,
   const selectedDevice = scrambledDevices.find((d) => d.id === selected);
 
   return (
-    <View style={g.container}>
+    <View style={g.container}
+      contentContainerStyle={g.scrollContent}
+      showsVerticalScrollIndicator={false}
+      bounces={false}
+    > 
       <View style={g.decorCircle} />
 
       {/* Header: back button | centered title | menu button */}
@@ -1017,7 +1032,7 @@ ${hintForPair}`,
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
         onRestart={handleRestart}
-        onHome={() => navigation.navigate('Menu')}
+        onHome={() => { setMenuVisible(false); navigation.navigate('Menu'); }}
       />
     </View>
   );
@@ -1108,6 +1123,7 @@ const ls = StyleSheet.create({
 
 // Game screen styles (g)
 const g = StyleSheet.create({
+  scrollContent:          { paddingBottom: 40, flexGrow: 1},
   container:              { flex: 1, backgroundColor: theme.colors.background, paddingTop: 50 },
   decorCircle:            { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: theme.colors.primary, opacity: 0.12 },
   header:                 { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 10 },
@@ -1124,7 +1140,7 @@ const g = StyleSheet.create({
   levelPillText:          { fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
   instruction:            { fontSize: 12, color: theme.colors.textLight, marginHorizontal: 16, marginBottom: 6, textAlign: 'center' },
   selectedBar:            { marginHorizontal: 16, marginBottom: 6, borderWidth: 1.5, borderRadius: theme.radius.sm, padding: 9, alignItems: 'center' },
-  selectedBarPlaceholder: { height: 38, marginHorizontal: 16, marginBottom: 6 },
+  selectedBarPlaceholder: { height: -1, marginTop:-10,  marginHorizontal: 10, marginBottom: 10 },
   selectedText:           { fontSize: 12, fontWeight: '700' },
   errorBanner:            { marginHorizontal: 16, marginBottom: 4, backgroundColor: '#FADFDF', borderWidth: 1, borderColor: '#F09595', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 14, alignItems: 'center' },
   errorText:              { fontSize: 12, fontWeight: '700', color: '#8B1F1F', textAlign: 'center' },
