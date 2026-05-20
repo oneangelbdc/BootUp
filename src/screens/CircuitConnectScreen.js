@@ -23,7 +23,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -684,6 +684,17 @@ function GameScreen({ navigation, route }) {
     [level, shuffleKey],
   );
 
+  useEffect(() => {
+    setMenuVisible(false);
+  }, [levelKey]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setMenuVisible(false);
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   // Board height = tallest row index + 1, converted to pixels
   const rows   = Math.max(...scrambledDevices.map((d) => d.row)) + 1;
   const GAME_H = rows * CELL_H + 16;
@@ -1017,7 +1028,7 @@ ${hintForPair}`,
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
         onRestart={handleRestart}
-        onHome={() => navigation.navigate('Menu')}
+        onHome={() => { setMenuVisible(false); navigation.navigate('Menu'); }}
       />
     </View>
   );
